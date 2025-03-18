@@ -1,6 +1,13 @@
 <script>
   import { persisted } from 'svelte-persisted-store'
   import { fade } from 'svelte/transition'
+  import {
+    $ as _$,
+    addEventListener,
+    extendHistoryApi,
+  } from 'browser-extension-utils'
+  import { cleanFilterString } from './utils/index.js'
+  import { HASH_DELIMITER } from './constants.js'
   import AddBookmark from './components/AddBookmark.svelte'
   import BookmarkList from './components/BookmarkList.svelte'
   import Sidebar from './components/Sidebar.svelte'
@@ -105,6 +112,42 @@
   let filteredBookmarks = $state([])
   const maxBookmarksPerPage = 100
   let fullList = $state(false)
+  let filterStringLevel1 = $state('')
+  let filterStringLevel2 = $state('')
+  let filterStringLevel3 = $state('')
+
+  function handleHashChange() {
+    console.error(
+      '>>>>>> locationchanged',
+      globalThis.currentUrlHash === location.hash,
+      globalThis.lastHash === location.hash,
+      location.href,
+      location.hash
+    )
+    if (globalThis.lastHash !== location.hash) {
+      console.log(
+        'lastHash:',
+        `[${decodeURIComponent(globalThis.lastHash)}]`,
+        '\nnewHash:',
+        `[${decodeURIComponent(location.hash)}]`
+      )
+
+      globalThis.lastHash = location.hash
+      const filterStringArr = location.hash.split(HASH_DELIMITER)
+      console.log(`[App.svelte] 多级筛选条件字符串:`, filterStringArr)
+
+      filterStringLevel1 = cleanFilterString(filterStringArr[1])
+      filterStringLevel2 = cleanFilterString(filterStringArr[2])
+      filterStringLevel3 = cleanFilterString(filterStringArr[3])
+    }
+  }
+
+  // 使浏览器支持 locationchange 自定义事件
+  extendHistoryApi()
+
+  addEventListener(globalThis, 'locationchange', handleHashChange)
+  // 初始化时触发一次
+  handleHashChange()
 
   function updateFilteredBookmarks() {
     console.log('!!! updateFilteredBookmarks')
@@ -144,12 +187,15 @@
         : useLevel2
           ? '.aside-area aside:nth-child(4)'
           : '.aside-area aside:nth-child(3)'
-      console.log(document.querySelector(selector))
-      document.querySelector(selector).scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-        inline: $settings.sidebarPosition === 'right' ? 'start' : 'end',
-      })
+      const lastSidebar = _$(selector)
+      console.log(lastSidebar)
+      if (lastSidebar) {
+        lastSidebar.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+          inline: $settings.sidebarPosition === 'right' ? 'start' : 'end',
+        })
+      }
     }, 10)
   }
 
@@ -333,6 +379,7 @@
       name="level1"
       level="1"
       paused={importProgress.total > 0}
+      filterString={filterStringLevel1}
       input={originalBookmarks}
       bind:output={filteredBookmarks1} />
 
@@ -341,6 +388,7 @@
         name="level2"
         level="2"
         paused={importProgress.total > 0}
+        filterString={filterStringLevel2}
         input={filteredBookmarks1}
         bind:output={filteredBookmarks2} />
 
@@ -349,6 +397,7 @@
           name="level3"
           level="3"
           paused={importProgress.total > 0}
+          filterString={filterStringLevel3}
           input={filteredBookmarks2}
           bind:output={filteredBookmarks3} />
       {/if}

@@ -1,15 +1,18 @@
 <script>
   import { fade } from 'svelte/transition'
   import { splitTags, trimTitle } from 'utags-utils'
-  import {
-    $ as _$,
-    addEventListener,
-    extendHistoryApi,
-  } from 'browser-extension-utils'
-  let { name, level, input, output = $bindable(), paused } = $props()
+  import { $ as _$ } from 'browser-extension-utils'
+  import { HASH_DELIMITER, FILTER_DELIMITER } from '../constants.js'
+  import { parseFilterString, convertToFilterString } from '../utils/index.js'
 
-  const HASH_DELIMITER = '#'
-  const FILTER_DELIMITER = '/'
+  let {
+    name,
+    level,
+    input,
+    output = $bindable(),
+    filterString,
+    paused,
+  } = $props()
 
   console.error('load component: level', level)
   // #tag1,tag2/domain1,domain2/keywod#tag3,tag4/domain3,domain4/keyword2#...
@@ -46,53 +49,6 @@
     }
   }
 
-  /**
-   * 解析URL哈希中的筛选条件
-   * @param {string} hash - 当前页面的location.hash值
-   * @returns {Object|undefined} 包含筛选条件的对象，解析失败返回undefined
-   */
-  function parseUrlHash(hash) {
-    if (hash?.length > 1) {
-      try {
-        // 分割哈希为多级筛选条件 [#level1#level2]
-        const filterStringArr = hash.split(HASH_DELIMITER)
-        console.log(`[level${level}] 多级筛选条件字符串:`, filterStringArr)
-
-        // 获取当前层级的筛选字符串
-        const filterString = filterStringArr[level]
-        console.log(`[level${level}] 当前筛选字符串:`, filterString)
-
-        if (filterString) {
-          // 分割标签、域名和关键词三部分 [tags/domains/keyword]
-          const [tagStr = '', domainStr = '', keyword = ''] =
-            filterString.split(FILTER_DELIMITER, 3)
-
-          // 处理标签数组（空字符串时返回空数组）
-          const tags = splitTags(decodeURIComponent(tagStr))
-
-          // 处理域名数组（空字符串时返回空数组）
-          const domains = splitTags(decodeURIComponent(domainStr))
-
-          // 清理并解码搜索关键词
-          const cleanedKeyword = trimTitle(decodeURIComponent(keyword))
-
-          return {
-            searchKeyword: cleanedKeyword,
-            selectedTags: new Set(tags),
-            selectedDomains: new Set(domains),
-          }
-        }
-      } catch (e) {
-        console.error('哈希解析失败:', {
-          error: e,
-          originalHash: hash,
-          level: level,
-        })
-      }
-    }
-    return undefined
-  }
-
   // 重置筛选条件
   function resetFilterWith(keyword, tags, domains) {
     console.log(`[level${level}] resetFilterWith`, keyword, tags, domains)
@@ -113,69 +69,40 @@
     }
   }
 
-  // 监听 hashchange 事件并更新 selectedTags
-  function handleHashChange() {
-    console.error(
-      '>>>>>> locationchanged',
-      globalThis.currentUrlHash === location.hash,
-      location.href,
-      location.hash
-    )
-    if (globalThis.currentUrlHash === location.hash) {
-      return
-    }
-
-    if (location.hash && location.hash.length > 1) {
-      const filter = parseUrlHash(location.hash)
-      if (filter) {
-        hashChanged = true
-        resetFilterWith(
-          filter.searchKeyword,
-          filter.selectedTags,
-          filter.selectedDomains
-        )
-      }
-    } else {
-      hashChanged = true
-      resetFilterWith()
-    }
-  }
-
-  if (!globalThis.locationchange) {
-    globalThis.locationchange = true
-    extendHistoryApi()
-
-    addEventListener(globalThis, 'locationchange', handleHashChange)
-  }
-
   // update url hash
   function updateUrlHash() {
     // hash sample: #tag1,tag2/domain1,domain2/keywod#tag3,tag4/domain3,domain4/keyword2#...
-    const filterString = [
-      encodeURIComponent([...selectedTags].join(',')),
-      encodeURIComponent([...selectedDomains].join(',')),
-      encodeURIComponent(searchKeyword.trim()),
-    ].join('/')
-    if (level === '1' && filterString === '//') {
-      // filters are empty
-      history.pushState({}, '', location.pathname)
-    } else {
-      const filterStringArr = location.hash.split('#')
-      filterStringArr.length = level
-      filterStringArr[level] = filterString === '//' ? '' : filterString
+    const filterString = convertToFilterString(
+      selectedTags,
+      selectedDomains,
+      searchKeyword
+    )
 
-      const newUrlHash = filterStringArr.join('#').replace(/[/#]+$/, '')
-      if (location.hash !== newUrlHash) {
-        globalThis.currentUrlHash = newUrlHash
-        console.log('newUrlHash', level, newUrlHash)
-        location.hash = newUrlHash
-      }
+    let newUrlHash
+    if (level === '1' && filterString === '') {
+      // filters are empty
+      newUrlHash = '#'
+      // Firefox triggers page reload when removing hash via pushState unlike Chrome
+      // Using pushState to clear hash isn't viable due to this browser-specific behavior
+      // history.pushState({}, '', location.pathname)
+    } else {
+      const filterStringArr = location.hash.split(HASH_DELIMITER)
+      filterStringArr.length = level
+      filterStringArr[level] = filterString
+
+      newUrlHash = filterStringArr.join(HASH_DELIMITER).replace(/[/#]+$/, '')
+    }
+
+    if (location.hash !== newUrlHash) {
+      console.log(`[level${level}] newUrlHash`, newUrlHash)
+      globalThis.currentUrlHash = newUrlHash
+      location.hash = newUrlHash
     }
   }
 
   // 监听 input 变化并更新 tagCounts 和 domainCounts
   $effect(() => {
-    console.error(`[${name}] init`)
+    console.error(`[${name}] init - input length:`, input.length)
 
     const _tagCounts = new Map(
       input
@@ -195,8 +122,8 @@
         }, new Map())
     )
 
-    // get filters
-    const filter = parseUrlHash(location.hash)
+    // get filters from url hash
+    const filter = parseFilterString(filterString)
     if (filter) {
       hashChanged = true
       let scrolled = false
