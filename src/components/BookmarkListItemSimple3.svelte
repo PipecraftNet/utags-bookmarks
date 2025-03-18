@@ -20,7 +20,7 @@
         {#if i > 0}
           <span class="sep"> / </span>
         {/if}
-        <a href="#{tag}" class="tag">{tag}</a>
+        <a href="#{encodeURIComponent(tag)}" class="tag">{tag}</a>
       {/each}
     </span>
     <span class="datetime text-gray-500" title={dateTitleText}

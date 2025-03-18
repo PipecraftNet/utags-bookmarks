@@ -1,85 +1,183 @@
 <script>
   import { fade } from 'svelte/transition'
+  import { splitTags, trimTitle } from 'utags-utils'
   import {
     $ as _$,
     addEventListener,
     extendHistoryApi,
   } from 'browser-extension-utils'
-  let {
-    name,
-    input,
-    output = $bindable(),
-    allTags = $bindable(),
-    allDomains = $bindable(),
-    paused,
-  } = $props()
+  let { name, level, input, output = $bindable(), paused } = $props()
+
+  const HASH_DELIMITER = '#'
+  const FILTER_DELIMITER = '/'
+
+  console.error('load component: level', level)
+  // #tag1,tag2/domain1,domain2/keywod#tag3,tag4/domain3,domain4/keyword2#...
 
   // 筛选相关状态
   let searchKeyword = $state('')
   let selectedTags = $state(new Set())
   let selectedDomains = $state(new Set())
-  let tagCounts = $state()
-  let domainCounts = $state()
+  let tagCounts = $state(new Map())
+  let domainCounts = $state(new Map())
+  let hashChanged = false
 
   function scrollTagIntoView(tag) {
-    const element = _$(`label[data-tag="${tag}"]`)
+    const element = _$(
+      `.sidebar-${level} .filter-group-tags label[data-key="${tag}"]`
+    )
     if (element) {
-      console.log(element)
       element.scrollIntoView({
-        behavior: 'smooth',
-        block: 'end',
+        behavior: 'auto',
+        block: 'start',
       })
     }
   }
 
+  function scrollDomainIntoView(domain) {
+    const element = _$(
+      `.sidebar-${level} .filter-group-domains label[data-key="${domain}"]`
+    )
+    if (element) {
+      element.scrollIntoView({
+        behavior: 'auto',
+        block: 'start',
+      })
+    }
+  }
+
+  /**
+   * 解析URL哈希中的筛选条件
+   * @param {string} hash - 当前页面的location.hash值
+   * @returns {Object|undefined} 包含筛选条件的对象，解析失败返回undefined
+   */
+  function parseUrlHash(hash) {
+    if (hash?.length > 1) {
+      try {
+        // 分割哈希为多级筛选条件 [#level1#level2]
+        const filterStringArr = hash.split(HASH_DELIMITER)
+        console.log(`[level${level}] 多级筛选条件字符串:`, filterStringArr)
+
+        // 获取当前层级的筛选字符串
+        const filterString = filterStringArr[level]
+        console.log(`[level${level}] 当前筛选字符串:`, filterString)
+
+        if (filterString) {
+          // 分割标签、域名和关键词三部分 [tags/domains/keyword]
+          const [tagStr = '', domainStr = '', keyword = ''] =
+            filterString.split(FILTER_DELIMITER, 3)
+
+          // 处理标签数组（空字符串时返回空数组）
+          const tags = splitTags(decodeURIComponent(tagStr))
+
+          // 处理域名数组（空字符串时返回空数组）
+          const domains = splitTags(decodeURIComponent(domainStr))
+
+          // 清理并解码搜索关键词
+          const cleanedKeyword = trimTitle(decodeURIComponent(keyword))
+
+          return {
+            searchKeyword: cleanedKeyword,
+            selectedTags: new Set(tags),
+            selectedDomains: new Set(domains),
+          }
+        }
+      } catch (e) {
+        console.error('哈希解析失败:', {
+          error: e,
+          originalHash: hash,
+          level: level,
+        })
+      }
+    }
+    return undefined
+  }
+
   // 重置筛选条件
   function resetFilterWith(keyword, tags, domains) {
+    console.log(`[level${level}] resetFilterWith`, keyword, tags, domains)
     searchKeyword = keyword || ''
-    selectedTags = new Set(tags)
-    selectedDomains = new Set(domains)
-    if (tags && tags.length > 0) {
+    selectedTags = tags || new Set()
+    selectedDomains = domains || new Set()
+
+    if (tags && tags.size > 0) {
       setTimeout(() => {
-        scrollTagIntoView(tags[0])
+        scrollTagIntoView(Array.from(tags)[0])
+      }, 5)
+    }
+
+    if (domains && domains.size > 0) {
+      setTimeout(() => {
+        scrollDomainIntoView(Array.from(domains)[0])
       }, 5)
     }
   }
 
   // 监听 hashchange 事件并更新 selectedTags
   function handleHashChange() {
-    console.log('locationchanged', location.href, location.hash)
+    console.error(
+      '>>>>>> locationchanged',
+      globalThis.currentUrlHash === location.hash,
+      location.href,
+      location.hash
+    )
+    if (globalThis.currentUrlHash === location.hash) {
+      return
+    }
+
     if (location.hash && location.hash.length > 1) {
-      try {
-        const tag = decodeURIComponent(location.hash.slice(1))
-        console.log(tag)
-        setTimeout(() => {
-          resetFilterWith('', [tag])
-        }, 5)
-      } catch (e) {
-        console.error(e)
+      const filter = parseUrlHash(location.hash)
+      if (filter) {
+        hashChanged = true
+        resetFilterWith(
+          filter.searchKeyword,
+          filter.selectedTags,
+          filter.selectedDomains
+        )
       }
+    } else {
+      hashChanged = true
+      resetFilterWith()
     }
   }
+
   if (!globalThis.locationchange) {
     globalThis.locationchange = true
     extendHistoryApi()
 
     addEventListener(globalThis, 'locationchange', handleHashChange)
-    if (location.hash) {
-      handleHashChange()
+  }
+
+  // update url hash
+  function updateUrlHash() {
+    // hash sample: #tag1,tag2/domain1,domain2/keywod#tag3,tag4/domain3,domain4/keyword2#...
+    const filterString = [
+      encodeURIComponent([...selectedTags].join(',')),
+      encodeURIComponent([...selectedDomains].join(',')),
+      encodeURIComponent(searchKeyword.trim()),
+    ].join('/')
+    if (level === '1' && filterString === '//') {
+      // filters are empty
+      history.pushState({}, '', location.pathname)
+    } else {
+      const filterStringArr = location.hash.split('#')
+      filterStringArr.length = level
+      filterStringArr[level] = filterString === '//' ? '' : filterString
+
+      const newUrlHash = filterStringArr.join('#').replace(/[/#]+$/, '')
+      if (location.hash !== newUrlHash) {
+        globalThis.currentUrlHash = newUrlHash
+        console.log('newUrlHash', level, newUrlHash)
+        location.hash = newUrlHash
+      }
     }
   }
 
-  // 监听 input 变化并更新 allTags 和 allDomains
+  // 监听 input 变化并更新 tagCounts 和 domainCounts
   $effect(() => {
-    console.log(`[${name}] init`)
-    allTags = new Set(input.flatMap((entry) => entry[1].tags))
-    allDomains = new Set(input.map((entry) => new URL(entry[0]).hostname))
+    console.error(`[${name}] init`)
 
-    searchKeyword = ''
-    selectedTags = new Set()
-    selectedDomains = new Set()
-
-    tagCounts = new Map(
+    const _tagCounts = new Map(
       input
         .flatMap((entry) => entry[1].tags)
         .reduce((acc, tag) => {
@@ -88,7 +186,7 @@
         }, new Map())
     )
 
-    domainCounts = new Map(
+    const _domainCounts = new Map(
       input
         .map((entry) => new URL(entry[0]).hostname)
         .reduce((acc, domain) => {
@@ -96,6 +194,48 @@
           return acc
         }, new Map())
     )
+
+    // get filters
+    const filter = parseUrlHash(location.hash)
+    if (filter) {
+      hashChanged = true
+      let scrolled = false
+      for (const tag of filter.selectedTags) {
+        if (!scrolled) {
+          scrolled = true
+          setTimeout(() => {
+            scrollTagIntoView(tag)
+          }, 5)
+        }
+        if (!_tagCounts.get(tag)) {
+          _tagCounts.set(tag, 0)
+        }
+      }
+
+      scrolled = false
+      for (const domain of filter.selectedDomains) {
+        if (!scrolled) {
+          scrolled = true
+          setTimeout(() => {
+            scrollDomainIntoView(domain)
+          }, 5)
+        }
+        if (!_domainCounts.get(domain)) {
+          _domainCounts.set(domain, 0)
+        }
+      }
+
+      searchKeyword = filter.searchKeyword
+      selectedTags = filter.selectedTags
+      selectedDomains = filter.selectedDomains
+    } else {
+      searchKeyword = ''
+      selectedTags = new Set()
+      selectedDomains = new Set()
+    }
+
+    tagCounts = _tagCounts
+    domainCounts = _domainCounts
   })
 
   // 监听筛选条件变化并更新 output
@@ -135,6 +275,15 @@
       output = [...input]
     }
 
+    console.log(`[level${level}] hashChanged`, hashChanged)
+    console.log('before', globalThis.currentUrlHash)
+    if (hashChanged) {
+      hashChanged = false
+    } else {
+      updateUrlHash()
+    }
+    console.log('after', globalThis.currentUrlHash)
+
     setTimeout(() => {
       window.dispatchEvent(new CustomEvent('filterUpdated'))
     }, 5)
@@ -153,14 +302,16 @@
   }
 </script>
 
-<aside class="sidebar" out:fade={{ duration: 1000 }}>
-  <div class="mb-4 flex flex-col gap-2">
+<aside
+  class="sidebar sidebar-{level} flex flex-col gap-4"
+  out:fade={{ duration: 500 }}>
+  <div class="flex flex-col gap-2">
     <button
       class="reset-filter rounded-md border border-gray-200 bg-gray-100 px-2 py-1 text-xs text-gray-700 transition-colors hover:bg-gray-200"
       onclick={() => {
         resetFilterWith()
       }}>
-      重置筛选
+      重置筛选 #{level}
     </button>
     <div class="relative w-full" style="padding-right: 1px;">
       <input
@@ -183,17 +334,16 @@
     </div>
   </div>
 
-  <div class="filter-controls">
-    {#if allTags && allTags.size}
-      <div
-        class="filter-group relative mb-5 max-h-[calc(50vh-32px)] overflow-y-auto">
+  <div class="filter-controls flex h-full flex-col gap-4">
+    {#if tagCounts && tagCounts.size}
+      <div class="filter-group filter-group-tags relative overflow-y-auto">
         <h4
           class="sticky top-0 m-0 border-b border-gray-100 bg-white py-2 text-sm font-medium text-gray-600">
           标签筛选
         </h4>
-        {#each Array.from(allTags).sort((a, b) => tagCounts.get(b) - tagCounts.get(a)) as tag}
+        {#each Array.from(tagCounts).sort((a, b) => b[1] - a[1]) as [tag, count]}
           <label
-            data-tag={tag}
+            data-key={tag}
             class="flex items-center gap-2 truncate rounded-md px-1 py-1.5 text-sm text-gray-700 hover:bg-gray-50">
             <input
               type="checkbox"
@@ -201,25 +351,24 @@
               checked={selectedTags.has(tag)}
               onchange={() => {
                 toggleTag(tag)
-                selectedTags = selectedTags
+                // selectedTags = selectedTagss
               }} />
             <span class="truncate">{tag}</span>
-            <span class="text-xs font-medium text-gray-400"
-              >{tagCounts.get(tag) || 0}</span>
+            <span class="text-xs font-medium text-gray-400">{count}</span>
           </label>
         {/each}
       </div>
     {/if}
 
-    {#if allDomains && allDomains.size}
-      <div
-        class="filter-group relative mb-5 max-h-[calc(50vh-32px)] overflow-y-auto">
+    {#if domainCounts && domainCounts.size}
+      <div class="filter-group filter-group-domains relative overflow-y-auto">
         <h4
           class="sticky top-0 m-0 border-b border-gray-100 bg-white py-2 text-sm font-medium text-gray-600">
           域名筛选
         </h4>
-        {#each Array.from(allDomains).sort((a, b) => domainCounts.get(b) - domainCounts.get(a)) as domain}
+        {#each Array.from(domainCounts).sort((a, b) => b[1] - a[1]) as [domain, count]}
           <label
+            data-key={domain}
             class="flex items-center gap-2 truncate rounded-md px-1 py-1.5 text-sm text-gray-700 hover:bg-gray-50">
             <input
               type="checkbox"
@@ -227,11 +376,10 @@
               checked={selectedDomains.has(domain)}
               onchange={() => {
                 toggleDomain(domain)
-                selectedDomains = selectedDomains
+                // selectedDomains = selectedDomains
               }} />
             <span class="truncate">{domain}</span>
-            <span class="text-xs font-medium text-gray-400"
-              >{domainCounts.get(domain) || 0}</span>
+            <span class="text-xs font-medium text-gray-400">{count}</span>
           </label>
         {/each}
       </div>
@@ -241,23 +389,26 @@
 
 <style>
   .sidebar {
-    /* background-color: wheat; */
     width: var(--sidebar-width);
     min-width: var(--sidebar-width);
     border-right: var(--sidebar-border-right);
     border-left: var(--sidebar-border-left);
     padding-left: var(--sidebar-padding-left);
     padding-right: var(--sidebar-padding-right);
-    overflow: hidden;
     scroll-snap-align: var(--sidebar-scroll-snap-align);
   }
 
+  .filter-controls {
+    overflow: hidden;
+  }
   .filter-group {
-    max-height: calc(50vh - 32px);
-    overflow-y: auto;
-    position: relative;
-    margin-bottom: 20px;
-    scroll-padding-bottom: 60%;
+    /* position: relative; */
+
+    scroll-padding-top: 55px;
+  }
+
+  .filter-group-domains {
+    min-height: calc(40%);
   }
 
   .filter-group h4 {

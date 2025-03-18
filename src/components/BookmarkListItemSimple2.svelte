@@ -12,7 +12,7 @@
     </a>
     <span class="tags flex flex-wrap gap-1">
       {#each tags as tag}
-        <a href="#{tag}" class="tag">{tag}</a>
+        <a href="#{encodeURIComponent(tag)}" class="tag">{tag}</a>
       {/each}
     </span>
     <a class="domain" {href} target="_blank" rel="noopener"

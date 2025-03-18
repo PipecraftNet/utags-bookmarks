@@ -88,6 +88,8 @@
   let showAddModal = $state(false)
   let allTags = $state(new Set())
   let allDomains = $state(new Set())
+  // allTags = new Set(input.flatMap((entry) => entry[1].tags))
+  //   allDomains = new Set(input.map((entry) => new URL(entry[0]).hostname))
   let filteredBookmarks1 = $state([])
   let filteredBookmarks2 = $state([])
   let filteredBookmarks3 = $state([])
@@ -313,7 +315,7 @@
 
     setTimeout(() => {
       document.querySelector('.aside-area aside:last-of-type').scrollIntoView({
-        behavior: 'smooth',
+        behavior: 'auto',
         block: 'start',
         inline: $settings.sidebarPosition === 'right' ? 'start' : 'end',
       })
@@ -329,15 +331,15 @@
 
     <Sidebar
       name="level1"
+      level="1"
       paused={importProgress.total > 0}
       input={originalBookmarks}
-      bind:output={filteredBookmarks1}
-      bind:allTags
-      bind:allDomains />
+      bind:output={filteredBookmarks1} />
 
     {#if useLevel2 && importProgress.total === 0}
       <Sidebar
         name="level2"
+        level="2"
         paused={importProgress.total > 0}
         input={filteredBookmarks1}
         bind:output={filteredBookmarks2} />
@@ -345,6 +347,7 @@
       {#if useLevel3}
         <Sidebar
           name="level3"
+          level="3"
           paused={importProgress.total > 0}
           input={filteredBookmarks2}
           bind:output={filteredBookmarks3} />
@@ -513,7 +516,7 @@
 <style>
   :root {
     --seperator-line: 1px solid #eee;
-    --container-justify-content: flex-end;
+    --container-justify-content: flex-start;
     --vertical-seperator-line-order: 0;
     --aside-area-order: 0;
     --aside-area-flex-direction: row;
@@ -529,7 +532,7 @@
   }
 
   .right-sidebar {
-    --container-justify-content: flex-start;
+    --container-justify-content: flex-end;
     --vertical-seperator-line-order: 1;
     --aside-area-order: 2;
     --aside-area-flex-direction: row-reverse;

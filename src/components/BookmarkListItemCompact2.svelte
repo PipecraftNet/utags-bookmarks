@@ -18,7 +18,7 @@
       <div class="tags flex flex-nowrap gap-2 overflow-x-auto">
         {#each tags as tag}
           <a
-            href="#{tag}"
+            href="#{encodeURIComponent(tag)}"
             class="tag border border-gray-200 p-1 pr-2 font-mono text-xs">
             {tag}
           </a>

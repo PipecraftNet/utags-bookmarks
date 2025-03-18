@@ -17,7 +17,7 @@
   <div class="description mt-1 flex flex-wrap items-baseline gap-1 truncate">
     <span class="tags flex flex-wrap gap-1">
       {#each tags as tag}
-        <a href="#{tag}" class="tag">{tag}</a>
+        <a href="#{encodeURIComponent(tag)}" class="tag">{tag}</a>
       {/each}
     </span>
     <span class="datetime text-gray-500" title={dateTitleText}

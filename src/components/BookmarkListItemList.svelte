@@ -48,7 +48,7 @@
       <div class="tags mt-2 flex flex-wrap gap-2">
         {#each tags as tag}
           <a
-            href="#{tag}"
+            href="#{encodeURIComponent(tag)}"
             class="tag inline-flex items-center gap-1 rounded-sm bg-gray-100 px-1.5 py-0.5 text-xs text-gray-700">
             <span class="font-normal tracking-tight">{tag}</span>
           </a>
