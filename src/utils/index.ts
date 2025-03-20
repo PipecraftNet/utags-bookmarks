@@ -1,5 +1,11 @@
 import { splitTags, trimTitle } from 'utags-utils'
+import Console from 'console-tagger'
 import { HASH_DELIMITER, FILTER_DELIMITER } from '../constants.js'
+
+const console = new Console({
+  prefix: 'utils',
+  color: { line: 'white', background: 'orange' },
+})
 
 /**
  * Normalizes and simplifies a URL by:
@@ -101,7 +107,7 @@ export function cleanFilterString(filterString: string | undefined) {
  */
 export function parseFilterString(filterString: string) {
   try {
-    console.info(`Current filter string: [${filterString}]`)
+    console.info(`current filter string: [${filterString}]`)
 
     if (filterString) {
       // Split into three parts: tags, domains, keyword [tags/domains/keyword]
@@ -133,17 +139,29 @@ export function parseFilterString(filterString: string) {
   return undefined
 }
 
+/**
+ * Converts tags, domains, and keywords into a URL-safe filter string
+ * @param {Set<string>} tags - Set of tags to encode
+ * @param {Set<string>} domains - Set of domains to encode
+ * @param {string} keyword - Search keyword to encode
+ * @returns {string} Formatted as [encoded_tags]/[encoded_domains]/[encoded_keyword]
+ * @example
+ * convertToFilterString(new Set(['tag1', 'tag2']), new Set(['example.com', 'test.com']), 'keyword')
+ * // Returns 'tag1%2Ctag2/example.com%2Ctest.com/keyword'
+ * @example
+ * convertToFilterString(new Set(), new Set(), '')
+ * // Returns ''
+ */
 export function convertToFilterString(
   tags: Set<string>,
   domains: Set<string>,
   keyword: string
 ) {
-  // sample: tag1,tag2/domain1,domain2/keywod
   const filterString = [
     encodeURIComponent([...tags].join(',')),
     encodeURIComponent([...domains].join(',')),
     encodeURIComponent(keyword.trim()),
   ].join(FILTER_DELIMITER)
 
-  return filterString === '//' ? '' : filterString
+  return filterString === '//' ? '' : filterString.replace(/[/#]+$/, '')
 }

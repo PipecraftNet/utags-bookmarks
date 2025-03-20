@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { humanizeUrl, cleanFilterString, parseFilterString } from './index.js'
+import { HASH_DELIMITER, FILTER_DELIMITER } from '../constants.js'
+import {
+  humanizeUrl,
+  cleanFilterString,
+  parseFilterString,
+  convertToFilterString,
+} from './index.js'
 
 describe('humanizeUrl', () => {
   it('should correctly handle URLs with tracking parameters', () => {
@@ -99,11 +105,11 @@ describe('parseFilterString', () => {
 
   it('should decode special characters', () => {
     const result = parseFilterString(
-      '%E4%B8%AD%E6%96%87%20tag/%E4%B8%AD%E6%96%87.com/key'
+      '%E4%B8%AD%E6%96%87%20tag%2F%ED%95%9C%EA%B5%AD%EC%96%B4%20tag/%E4%B8%AD%E6%96%87.com/key'
     )
     expect(result).toEqual({
       searchKeyword: 'key',
-      selectedTags: new Set(['中文 tag']),
+      selectedTags: new Set(['中文 tag/한국어 tag']),
       selectedDomains: new Set(['中文.com']),
     })
   })
@@ -114,5 +120,53 @@ describe('parseFilterString', () => {
 
   it('should return undefined when parsing fails', () => {
     expect(parseFilterString('invalid//@#$%^&*()')).toBeUndefined()
+  })
+})
+
+describe('convertToFilterString', () => {
+  it('should handle empty sets and empty keyword', () => {
+    expect(convertToFilterString(new Set(), new Set(), '')).toBe('')
+  })
+
+  it('should handle tags only', () => {
+    expect(
+      convertToFilterString(new Set(['tag1', 'tag2']), new Set(), '')
+    ).toBe(
+      `tag1%2Ctag2${FILTER_DELIMITER}${FILTER_DELIMITER}`.replace(/[/#]+$/, '')
+    )
+  })
+
+  it('should handle combination of tags and domains', () => {
+    expect(
+      convertToFilterString(
+        new Set(['前端', 'bug']),
+        new Set(['example.com', 'test.com']),
+        ''
+      )
+    ).toBe(`%E5%89%8D%E7%AB%AF%2Cbug${FILTER_DELIMITER}example.com%2Ctest.com`)
+  })
+
+  it('should handle complete parameters with special characters', () => {
+    // Normally tags shouldn't contain ',' or '/' characters
+    expect(
+      convertToFilterString(
+        new Set(['tag,1', 'tag/2']),
+        new Set(['domain.com', 'sub.domain']),
+        'search keyword'
+      )
+    ).toBe(
+      `tag%2C1%2Ctag%2F2${FILTER_DELIMITER}domain.com%2Csub.domain${FILTER_DELIMITER}search%20keyword`
+    )
+  })
+
+  it('should trim trailing delimiters', () => {
+    expect(convertToFilterString(new Set(), new Set(), '')).toBe('')
+    expect(convertToFilterString(new Set(['tag']), new Set(), '')).toBe(`tag`)
+  })
+
+  it('should handle mixed empty parameters', () => {
+    expect(
+      convertToFilterString(new Set(), new Set(['domain']), 'keyword')
+    ).toBe(`${FILTER_DELIMITER}domain${FILTER_DELIMITER}keyword`)
   })
 })

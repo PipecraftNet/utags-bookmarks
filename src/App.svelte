@@ -13,6 +13,12 @@
   import Sidebar from './components/Sidebar.svelte'
   import NavSidebar from './components/NavSidebar.svelte'
   import SavedFilters from './components/SavedFilters.svelte'
+  import Console from 'console-tagger'
+
+  const console = new Console({
+    prefix: 'app',
+    color: { line: 'white', background: 'red' },
+  })
 
   // 初始化书签存储
   const bookmarks = persisted('utags-bookmarks', {
@@ -117,8 +123,8 @@
   let filterStringLevel3 = $state('')
 
   function handleHashChange() {
-    console.error(
-      '>>>>>> locationchanged',
+    console.log(
+      '>>>>>> location changed',
       globalThis.currentUrlHash === location.hash,
       globalThis.lastHash === location.hash,
       location.href,
@@ -126,28 +132,42 @@
     )
     if (globalThis.lastHash !== location.hash) {
       console.log(
-        'lastHash:',
+        'last hash:',
         `[${decodeURIComponent(globalThis.lastHash)}]`,
-        '\nnewHash:',
+        '\n       new hash:',
         `[${decodeURIComponent(location.hash)}]`
       )
 
-      globalThis.lastHash = location.hash
       const filterStringArr = location.hash.split(HASH_DELIMITER)
-      console.log(`[App.svelte] 多级筛选条件字符串:`, filterStringArr)
+      const _filterStringLevel1 = cleanFilterString(filterStringArr[1])
+      // Invalid hash, clear it
+      if (location.hash && !_filterStringLevel1) {
+        history.replaceState({}, '', '#')
+        return
+      }
 
-      filterStringLevel1 = cleanFilterString(filterStringArr[1])
+      globalThis.lastHash = location.hash
+
+      filterStringLevel1 = _filterStringLevel1
       filterStringLevel2 = cleanFilterString(filterStringArr[2])
       filterStringLevel3 = cleanFilterString(filterStringArr[3])
+      console.log(`multi-level filter strings:`, [
+        filterStringLevel1,
+        filterStringLevel2,
+        filterStringLevel3,
+      ])
     }
   }
 
-  // 使浏览器支持 locationchange 自定义事件
-  extendHistoryApi()
+  if (!globalThis.locationchange) {
+    globalThis.locationchange = true
+    // 使浏览器支持 locationchange 自定义事件
+    extendHistoryApi()
 
-  addEventListener(globalThis, 'locationchange', handleHashChange)
-  // 初始化时触发一次
-  handleHashChange()
+    addEventListener(globalThis, 'locationchange', handleHashChange)
+    // 初始化时触发一次
+    handleHashChange()
+  }
 
   function updateFilteredBookmarks() {
     console.log('!!! updateFilteredBookmarks')

@@ -1,9 +1,15 @@
 <script>
   import { fade } from 'svelte/transition'
+  import Console from 'console-tagger'
   import { splitTags, trimTitle } from 'utags-utils'
   import { $ as _$ } from 'browser-extension-utils'
   import { HASH_DELIMITER, FILTER_DELIMITER } from '../constants.js'
   import { parseFilterString, convertToFilterString } from '../utils/index.js'
+
+  const console = new Console({
+    prefix: 'sidebar-level' + level,
+    color: { line: 'white', background: ['green', 'blue', 'black'][level - 1] },
+  })
 
   let {
     name,
@@ -14,7 +20,7 @@
     paused,
   } = $props()
 
-  console.error('load component: level', level)
+  console.log(`component loaded`)
   // #tag1,tag2/domain1,domain2/keywod#tag3,tag4/domain3,domain4/keyword2#...
 
   // 筛选相关状态
@@ -23,7 +29,7 @@
   let selectedDomains = $state(new Set())
   let tagCounts = $state(new Map())
   let domainCounts = $state(new Map())
-  let hashChanged = false
+  let statesInited = false
 
   function scrollTagIntoView(tag) {
     const element = _$(
@@ -32,7 +38,7 @@
     if (element) {
       element.scrollIntoView({
         behavior: 'auto',
-        block: 'start',
+        block: 'nearest',
       })
     }
   }
@@ -44,14 +50,14 @@
     if (element) {
       element.scrollIntoView({
         behavior: 'auto',
-        block: 'start',
+        block: 'nearest',
       })
     }
   }
 
   // 重置筛选条件
   function resetFilterWith(keyword, tags, domains) {
-    console.log(`[level${level}] resetFilterWith`, keyword, tags, domains)
+    console.log(`resetFilterWith`, keyword, tags, domains)
     searchKeyword = keyword || ''
     selectedTags = tags || new Set()
     selectedDomains = domains || new Set()
@@ -78,15 +84,29 @@
       searchKeyword
     )
 
+    // 第一次执行时，selectedTags, selectedDomains, searchKeyword 还是初始化状态，不更新 url hash
+    if (!statesInited) {
+      statesInited = true
+      return
+    }
+
     let newUrlHash
     if (level === '1' && filterString === '') {
       // filters are empty
       newUrlHash = '#'
-      // Firefox triggers page reload when removing hash via pushState unlike Chrome
-      // Using pushState to clear hash isn't viable due to this browser-specific behavior
-      // history.pushState({}, '', location.pathname)
+      // Notes: 不能设置为 ''，历史记录前进后退时会出现问题
     } else {
       const filterStringArr = location.hash.split(HASH_DELIMITER)
+      const currentFilterString = filterStringArr[level] || ''
+      console.log(
+        `last filter string:`,
+        `[${decodeURIComponent(currentFilterString)}]`,
+        '\n                  new filter string:',
+        `[${decodeURIComponent(filterString)}]`
+      )
+      if (currentFilterString === filterString) {
+        return
+      }
       filterStringArr.length = level
       filterStringArr[level] = filterString
 
@@ -94,15 +114,23 @@
     }
 
     if (location.hash !== newUrlHash) {
-      console.log(`[level${level}] newUrlHash`, newUrlHash)
+      console.log(`new url hash [${newUrlHash}]`)
       globalThis.currentUrlHash = newUrlHash
       location.hash = newUrlHash
     }
   }
 
+  $effect(() => {
+    console.log(`call updateUrlHash()`)
+    updateUrlHash()
+  })
+
   // 监听 input 变化并更新 tagCounts 和 domainCounts
   $effect(() => {
-    console.error(`[${name}] init - input length:`, input.length)
+    console.log(
+      `init tagCounts and domainCounts - input list length:`,
+      input.length
+    )
 
     const _tagCounts = new Map(
       input
@@ -125,32 +153,30 @@
     // get filters from url hash
     const filter = parseFilterString(filterString)
     if (filter) {
-      hashChanged = true
-      let scrolled = false
+      let lastOne
       for (const tag of filter.selectedTags) {
-        if (!scrolled) {
-          scrolled = true
-          setTimeout(() => {
-            scrollTagIntoView(tag)
-          }, 5)
-        }
+        lastOne = tag
+
         if (!_tagCounts.get(tag)) {
           _tagCounts.set(tag, 0)
         }
       }
 
-      scrolled = false
+      setTimeout(() => {
+        scrollTagIntoView(lastOne)
+      }, 5)
+
       for (const domain of filter.selectedDomains) {
-        if (!scrolled) {
-          scrolled = true
-          setTimeout(() => {
-            scrollDomainIntoView(domain)
-          }, 5)
-        }
+        lastOne = domain
+
         if (!_domainCounts.get(domain)) {
           _domainCounts.set(domain, 0)
         }
       }
+
+      setTimeout(() => {
+        scrollDomainIntoView(lastOne)
+      }, 5)
 
       searchKeyword = filter.searchKeyword
       selectedTags = filter.selectedTags
@@ -168,18 +194,18 @@
   // 监听筛选条件变化并更新 output
   $effect(() => {
     if (paused) {
-      console.log(`[${name}] paused`)
+      console.log(`paused`)
       return
     }
     console.log(
-      `[${name}] current filter:`,
+      `current filter:`,
       `'${searchKeyword}'`,
       selectedTags,
       selectedDomains
     )
 
     if (searchKeyword || selectedTags.size || selectedDomains.size) {
-      console.log(`=> [${name}] apply filter`)
+      console.log(`=> apply filter`)
       output = input.filter(([url, entry]) => {
         const lowerKeyword = searchKeyword.trim().toLowerCase()
         const hasKeyword =
@@ -201,15 +227,6 @@
     } else {
       output = [...input]
     }
-
-    console.log(`[level${level}] hashChanged`, hashChanged)
-    console.log('before', globalThis.currentUrlHash)
-    if (hashChanged) {
-      hashChanged = false
-    } else {
-      updateUrlHash()
-    }
-    console.log('after', globalThis.currentUrlHash)
 
     setTimeout(() => {
       window.dispatchEvent(new CustomEvent('filterUpdated'))
