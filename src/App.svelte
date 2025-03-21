@@ -392,8 +392,8 @@
 </script>
 
 <main class="{$settings.sidebarPosition}-sidebar">
-  <Header {importData} {exportData} {clearAll} {showAddModal} {toggleView} />
-  <div class="container">
+  <Header {importData} {exportData} {clearAll} bind:showAddModal {toggleView} />
+  <div class="container bg-white dark:bg-black">
     <div class="aside-area">
       <NavSidebar />
 
@@ -431,19 +431,21 @@
     <div class="content-area flex flex-col">
       <div
         style="flex-wrap: wrap"
-        class="toolbar mb-6 flex items-center justify-between rounded-lg border border-gray-200 bg-white/90 px-4 py-3 shadow-sm backdrop-blur-sm">
+        class="toolbar mb-6 flex items-center justify-between rounded-lg border border-(color:--seperator-line-color) bg-white/90 px-4 py-3 shadow-sm backdrop-blur-sm dark:bg-black/90">
         <Statistics
           totalBookmarks={stats.totalBookmarks}
           selectedTagsCount={stats.selectedTagsCount}
           selectedDomainsCount={stats.selectedDomainsCount} />
         <div class="flex items-center gap-2">
-          <span class="text-sm text-gray-700">排序方式: </span>
-          <div class="flex gap-1 rounded-md bg-gray-100 p-1">
+          <span class="text-sm text-gray-700 dark:text-gray-200"
+            >排序方式:
+          </span>
+          <div class="flex gap-1 rounded-md bg-gray-100 p-1 dark:bg-gray-800">
             <label
               class="cursor-pointer rounded-md px-3 py-1.5 transition-colors {sortBy ===
               'updated'
                 ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-50'}">
+                : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'}">
               <input
                 type="radio"
                 name="sort-by"
@@ -460,7 +462,7 @@
               class="cursor-pointer rounded-md px-3 py-1.5 transition-colors {sortBy ===
               'created'
                 ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-50'}">
+                : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'}">
               <input
                 type="radio"
                 name="sort-by"
@@ -477,9 +479,11 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <span class="text-sm text-gray-700">视图模式: </span>
+          <span class="text-sm text-gray-700 dark:text-gray-200"
+            >视图模式:
+          </span>
           <select
-            class="rounded-md bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm transition-colors duration-200 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+            class="rounded-md bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm transition-colors duration-200 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
             bind:value={$settings.viewMode}>
             <option value="list">列表</option>
             <option value="compact">紧凑 1</option>
@@ -508,7 +512,7 @@
         </div>
       {/if}
 
-      <div class="bookmark-list shadow-lg">
+      <div class="bookmark-list shadow-lg dark:border dark:border-gray-700">
         <BookmarkList
           filteredBookmarks={fullList
             ? filteredBookmarks
@@ -517,16 +521,17 @@
           bind:scrollTop />
         {#if filteredBookmarks.length > maxBookmarksPerPage && !fullList}
           <div
-            class="mt-4 flex items-center justify-center border-t-1 border-gray-200 bg-white/90 p-4 shadow-sm">
+            class="mt-4 flex items-center justify-center border-t-1 border-(color:--seperator-line-color) bg-white/90 p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
             <div class="text-center">
-              <span class="text-sm leading-relaxed text-gray-600">
+              <span
+                class="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
                 当前已加载前 100 个书签🔖 <br />
-                <span class="text-xs text-gray-500"
+                <span class="text-xs text-gray-500 dark:text-gray-400"
                   >若您想查看全部书签，请点击‘展开所有’按钮</span>
               </span>
             </div>
             <button
-              class="ml-4 flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm text-white shadow-sm transition-colors duration-200 hover:bg-blue-700"
+              class="ml-4 flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm text-white shadow-sm transition-colors duration-200 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
               onclick={() => {
                 fullList = true
                 scrollTop = document.querySelector('.bookmark-list').scrollTop
@@ -544,7 +549,8 @@
 
 <style>
   :root {
-    --seperator-line: 1px solid #eee;
+    --seperator-line-color: #f6f3f4;
+    --seperator-line: 1px solid var(--seperator-line-color);
     --container-justify-content: flex-start;
     --vertical-seperator-line-order: 0;
     --aside-area-order: 0;
@@ -558,6 +564,8 @@
     --sidebar-padding-right: 20px;
     --sidebar-reset-filter-align-self: flex-end;
     --sidebar-scroll-snap-align: end;
+    --main-background-color: #f6f8fc;
+    --shadow-color: white;
   }
 
   .right-sidebar {
@@ -575,8 +583,14 @@
     --sidebar-scroll-snap-align: start;
   }
 
+  :root.dark {
+    --main-background-color: #292a2d;
+    --shadow-color: #000;
+    --seperator-line-color: #364153;
+  }
+
   main {
-    background-color: #f6f8fc;
+    background-color: var(--main-background-color);
   }
 
   .container {
@@ -589,7 +603,7 @@
     padding: 57px 20px 0;
     position: relative;
     overflow: hidden;
-    background-color: white;
+    /* background-color: white; */
   }
 
   .aside-area {
@@ -612,7 +626,7 @@
     /* height: calc(100% - 20px); */
     border-right: none;
     border-left: var(--seperator-line);
-    box-shadow: 0px -15px 15px 15px white;
+    box-shadow: 0px -15px 15px 15px var(-shadow-color);
     display: block;
     z-index: 2;
     order: var(--vertical-seperator-line-order);
@@ -633,7 +647,7 @@
     gap: 16px;
     margin-bottom: 24px;
     padding-bottom: 16px;
-    border-bottom: 1px solid #f1f5f9;
+    /* border-bottom: 1px solid #f1f5f9; */
   }
 
   .bookmark-list {

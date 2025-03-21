@@ -50,9 +50,9 @@
 <div class="saved-filters">
   <div class="mb-4 space-y-3">
     <button
-      class="flex w-full items-center justify-center rounded-lg bg-indigo-600
-             px-4 py-2 text-lg font-medium
-             text-white shadow-sm transition-all duration-200 hover:bg-indigo-700"
+      class="flex w-full items-center justify-center rounded-lg bg-indigo-600 px-4
+             py-2 text-lg font-medium text-white shadow-sm transition-all
+             duration-200 hover:bg-indigo-700 dark:bg-indigo-700 dark:text-gray-300 dark:hover:bg-indigo-600"
       onclick={saveFilter}
       disabled={!filterName}>
       保存当前筛选条件
@@ -62,15 +62,15 @@
         type="text"
         bind:value={filterName}
         placeholder="输入筛选条件名称"
-        class="flex-1 rounded-xl border-2 border-indigo-100 px-4 py-2.5
-             shadow-sm transition-all outline-none
-             focus:border-indigo-300 focus:ring-2 focus:ring-indigo-200"
+        class="flex-1 rounded-xl border-2 border-indigo-100 bg-white px-4 py-2.5
+             shadow-sm transition-all outline-none focus:border-indigo-300 focus:ring-2
+             focus:ring-indigo-200 dark:border-gray-600 dark:bg-gray-700 dark:focus:border-indigo-500"
         onkeydown={(e) => e.key === 'Enter' && saveFilter()} />
       <button
         onclick={saveFilter}
-        class="flex items-center rounded-xl bg-indigo-500 px-6
-             py-2.5 text-base text-white shadow-sm
-             transition-all duration-200 hover:bg-indigo-600 disabled:opacity-50"
+        class="flex items-center rounded-xl bg-indigo-500 px-6 py-2.5
+             text-base text-white shadow-sm transition-all duration-200
+             hover:bg-indigo-600 disabled:opacity-50 dark:bg-indigo-600 dark:text-gray-200 dark:hover:bg-indigo-700"
         disabled={!filterName}>
         保存
       </button>
@@ -80,15 +80,18 @@
   <ul class="max-h-[calc(100%-76px)] space-y-2 overflow-y-auto">
     {#each $filters as filter}
       <li
-        class="group flex items-center justify-between rounded-md px-2 py-1.5 transition-colors hover:bg-indigo-50">
+        class="group flex items-center justify-between rounded-md px-2 py-1.5 transition-colors
+        hover:bg-indigo-50 dark:text-gray-300 dark:hover:bg-gray-800">
         <button
           onclick={() => applyFilter(filter)}
-          class="truncate text-sm text-gray-700 hover:text-indigo-800">
+          class="truncate text-sm text-gray-700 hover:text-indigo-800 dark:text-gray-400 dark:hover:text-indigo-400">
           {filter.name}
         </button>
         <button
           onclick={() => deleteFilter(filter.id)}
-          class="rounded-md px-2 py-1 text-sm text-red-500 opacity-0 transition-opacity duration-200 group-hover:opacity-100 hover:bg-red-50 hover:text-red-700">
+          class="rounded-md px-2 py-1 text-sm text-red-500 opacity-0 transition-opacity
+          duration-200 group-hover:opacity-100 hover:bg-red-50
+          hover:text-red-700 dark:text-red-400 dark:hover:bg-gray-700">
           ×
         </button>
       </li>

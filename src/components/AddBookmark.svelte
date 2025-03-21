@@ -119,8 +119,9 @@
     role="dialog"
     aria-label="添加新书签对话框"
     tabindex="0"
-    class="fixed inset-0 z-50 flex h-[100vh] items-center justify-center bg-black/50">
-    <div class="w-full max-w-md space-y-4 rounded-xl bg-white p-5 shadow-2xl">
+    class="fixed inset-0 z-50 flex h-[100vh] items-center justify-center bg-black/50 dark:bg-gray-900/90">
+    <div
+      class="w-full max-w-md space-y-4 rounded-xl bg-white p-5 shadow-2xl dark:bg-gray-800">
       <h3>添加新书签</h3>
       <div class="flex flex-col gap-2">
         <label for="url-input">URL: </label>
@@ -130,11 +131,13 @@
           bind:value={url}
           onblur={validateUrl}
           placeholder="https://example.com"
-          class="rounded border px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none {error
+          class="rounded border px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-700 dark:text-gray-300 dark:focus:border-blue-600 dark:focus:ring-blue-600 {error
             ? 'border-red-500 ring-red-500'
             : ''}" />
         {#if error}
-          <div out:fade={{ duration: 200 }} class="mt-1 text-sm text-red-500">
+          <div
+            out:fade={{ duration: 200 }}
+            class="mt-1 text-sm text-red-500 dark:text-red-400">
             {error}
           </div>
         {/if}
@@ -146,8 +149,8 @@
           type="text"
           bind:value={title}
           disabled={!url}
-          class="rounded border px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none {!url
-            ? 'cursor-not-allowed bg-gray-100'
+          class="rounded border px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-700 dark:text-gray-300 dark:focus:border-blue-600 dark:focus:ring-blue-600 {!url
+            ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-700/20'
             : ''}" />
       </div>
       <div class="flex flex-col gap-2">
@@ -159,21 +162,23 @@
           disabled={!url}
           onblur={validateTags}
           placeholder="工作,技术,重要"
-          class="rounded border px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none {!url
-            ? 'cursor-not-allowed bg-gray-100'
+          class="rounded border px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-700 dark:text-gray-300 dark:focus:border-blue-600 dark:focus:ring-blue-600 {!url
+            ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-700/20'
             : ''} {tagError ? 'border-red-500 ring-red-500' : ''}" />
         {#if tagError}
-          <div out:fade={{ duration: 200 }} class="mt-1 text-sm text-red-500">
+          <div
+            out:fade={{ duration: 200 }}
+            class="mt-1 text-sm text-red-500 dark:text-red-400">
             {tagError}
           </div>
         {/if}
       </div>
       <div class="form-actions">
         <button
-          class="rounded bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-2 text-white transition-all hover:from-blue-600 hover:to-blue-700"
+          class="rounded bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-2 text-white transition-all hover:from-blue-600 hover:to-blue-700 dark:from-blue-700 dark:to-blue-800 dark:hover:from-blue-800 dark:hover:to-blue-900"
           onclick={addBookmark}>保存</button>
         <button
-          class="rounded border border-gray-300 px-4 py-2 transition-colors hover:bg-gray-50"
+          class="rounded border border-gray-300 px-4 py-2 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700/30"
           onclick={close}>取消</button>
       </div>
     </div>

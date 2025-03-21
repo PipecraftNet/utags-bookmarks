@@ -29,13 +29,27 @@
 
 <style>
   .list-simple {
+    --bookmark-title-color: #4644d5;
+    --secondary-link-color: #4240d4cc;
+    --alternative-color: #048f8d;
+    --bookmark-actions-color: #6b7280;
+    --bookmark-actions-hover-color: #374151;
+  }
+  :root.dark .list-simple {
+    --bookmark-title-color: #adabf7;
+    --secondary-link-color: #adabf7cc;
+    --alternative-color: #5ec9c8;
+    --bookmark-actions-color: #9ca3af;
+    --bookmark-actions-hover-color: #d1d5db;
+  }
+  .list-simple {
     flex: 1 1 0;
   }
   .list-simple .title {
     position: relative;
   }
   .list-simple .title a {
-    color: #4644d5;
+    color: var(--bookmark-title-color);
     display: block;
     font-size: 14px;
     font-weight: 500;
@@ -45,10 +59,10 @@
     white-space: nowrap;
   }
   .list-simple .url-path {
-    color: #4240d4cc;
+    color: var(--secondary-link-color);
   }
   .list-simple .tags .tag {
-    color: #048f8d;
+    color: var(--alternative-color);
     font-size: 14px;
   }
 
@@ -62,8 +76,11 @@
   }
   .list-simple .datetime,
   .list-simple .action {
-    color: #6b7280;
+    color: var(--bookmark-actions-color);
     font-size: 13px;
+  }
+  .list-simple .action:hover {
+    color: var(--bookmark-actions-hover-color);
   }
   .list-simple .description span:not(:first-of-type):not(.tag)::before {
     content: '|';

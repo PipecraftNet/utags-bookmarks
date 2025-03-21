@@ -5,12 +5,12 @@
 </script>
 
 <div
-  class="list-compact group relative mx-[6px] rounded-md bg-white p-2 transition-colors duration-50">
+  class="list-compact group relative mx-[6px] rounded-md p-2 transition-colors duration-50">
   <div class="flex items-center justify-between gap-2">
     <div class="flex items-center gap-2 truncate">
       <Favicon {href} classNames="h-4 w-4 flex-none" />
       <h3
-        class="flex-none truncate text-sm font-normal text-gray-900 underline">
+        class="flex-none truncate text-sm font-normal text-gray-900 underline dark:text-gray-300">
         <a {href} {title} target="_blank" rel="noopener">
           {title}
         </a>
@@ -19,13 +19,15 @@
         {#each tags as tag}
           <a
             href="#{encodeURIComponent(tag)}"
-            class="tag border border-gray-200 p-1 pr-2 font-mono text-xs">
+            class="tag border border-gray-200 p-1 pr-2 font-mono text-xs dark:border-gray-600">
             {tag}
           </a>
         {/each}
       </div>
     </div>
-    <span class="text-text-muted pt-1 font-mono text-sm" title={dateTitleText}>
+    <span
+      class="text-text-muted pt-1 font-mono text-sm dark:text-gray-500"
+      title={dateTitleText}>
       {formatedUpdated}
     </span>
   </div>

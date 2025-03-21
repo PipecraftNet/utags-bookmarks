@@ -251,7 +251,7 @@
   out:fade={{ duration: 500 }}>
   <div class="flex flex-col gap-2">
     <button
-      class="reset-filter rounded-md border border-gray-200 bg-gray-100 px-2 py-1 text-xs text-gray-700 transition-colors hover:bg-gray-200"
+      class="reset-filter rounded-md border border-gray-200 bg-gray-100 px-2 py-1 text-xs text-gray-700 transition-colors hover:bg-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
       onclick={() => {
         resetFilterWith()
       }}>
@@ -265,7 +265,7 @@
         bind:value={searchKeyword} />
       {#if searchKeyword}
         <button
-          class="absolute top-1/2 right-2 -translate-y-1/2 rounded-full bg-gray-100 p-1 transition-colors hover:bg-gray-200"
+          class="absolute top-1/2 right-2 -translate-y-1/2 rounded-full bg-gray-100 p-1 transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
           onclick={() => (searchKeyword = '')}
           aria-label="清除搜索关键词">
           <svg class="h-3.5 w-3.5" viewBox="0 0 24 24">
@@ -282,13 +282,13 @@
     {#if tagCounts && tagCounts.size}
       <div class="filter-group filter-group-tags relative overflow-y-auto">
         <h4
-          class="sticky top-0 m-0 border-b border-gray-100 bg-white py-2 text-sm font-medium text-gray-600">
+          class="sticky top-0 m-0 border-b border-gray-100 bg-white py-2 text-sm font-medium text-gray-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200">
           标签筛选
         </h4>
         {#each Array.from(tagCounts).sort((a, b) => b[1] - a[1]) as [tag, count]}
           <label
             data-key={tag}
-            class="flex items-center gap-2 truncate rounded-md px-1 py-1.5 text-sm text-gray-700 hover:bg-gray-50">
+            class="flex items-center gap-2 truncate rounded-md px-1 py-1.5 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800">
             <input
               type="checkbox"
               class="form-checkbox h-3.5 w-3.5 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
@@ -307,13 +307,13 @@
     {#if domainCounts && domainCounts.size}
       <div class="filter-group filter-group-domains relative overflow-y-auto">
         <h4
-          class="sticky top-0 m-0 border-b border-gray-100 bg-white py-2 text-sm font-medium text-gray-600">
+          class="sticky top-0 m-0 border-b border-gray-100 bg-white py-2 text-sm font-medium text-gray-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200">
           域名筛选
         </h4>
         {#each Array.from(domainCounts).sort((a, b) => b[1] - a[1]) as [domain, count]}
           <label
             data-key={domain}
-            class="flex items-center gap-2 truncate rounded-md px-1 py-1.5 text-sm text-gray-700 hover:bg-gray-50">
+            class="flex items-center gap-2 truncate rounded-md px-1 py-1.5 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800">
             <input
               type="checkbox"
               class="form-checkbox h-3.5 w-3.5 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
@@ -323,7 +323,8 @@
                 // selectedDomains = selectedDomains
               }} />
             <span class="truncate">{domain}</span>
-            <span class="text-xs font-medium text-gray-400">{count}</span>
+            <span class="text-xs font-medium text-gray-400 dark:text-gray-500"
+              >{count}</span>
           </label>
         {/each}
       </div>
@@ -360,7 +361,6 @@
   .filter-group h4 {
     position: sticky;
     top: 0;
-    background: white;
     padding: 8px 0;
     z-index: 1;
     margin: 0;

@@ -15,12 +15,12 @@
 </script>
 
 <div
-  class="list-default group relative mr-[10px] ml-[10px] rounded-md bg-white p-2 transition-colors duration-50 hover:bg-gray-100">
+  class="list-default group relative mr-[10px] ml-[10px] rounded-md bg-white p-2 transition-colors duration-50 hover:bg-gray-100 dark:bg-black dark:hover:bg-gray-800">
   <div class="flex items-center gap-3">
     <div class="min-w-0 flex-1 space-y-0.5">
       <div class="flex items-center gap-2 truncate">
         <h3
-          class="truncate text-sm text-gray-900"
+          class="truncate text-sm text-gray-900 dark:text-gray-300"
           style="flex: 0 0 50%; min-width: 0;">
           <a
             {href}
@@ -41,7 +41,7 @@
           title={href}
           target="_blank"
           rel="noopener"
-          class="truncate pt-0.5 text-xs text-gray-800 hover:text-gray-800">
+          class="truncate pt-0.5 text-xs text-gray-800 hover:text-gray-300 dark:text-gray-400">
           {humanizeUrl(href)}
         </a>
       </div>
@@ -49,7 +49,7 @@
         {#each tags as tag}
           <a
             href="#{encodeURIComponent(tag)}"
-            class="tag inline-flex items-center gap-1 rounded-sm bg-gray-100 px-1.5 py-0.5 text-xs text-gray-700">
+            class="tag inline-flex items-center gap-1 rounded-sm bg-gray-100 px-1.5 py-0.5 text-xs text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
             <span class="font-normal tracking-tight">{tag}</span>
           </a>
         {/each}
@@ -57,7 +57,7 @@
     </div>
     <div class="top-3 right-3 text-right">
       <span
-        class="font-mono text-xs tracking-tight text-gray-500"
+        class="font-mono text-xs tracking-tight text-gray-500 dark:text-gray-500"
         title={dateTitleText}>
         {#if created === updated}
           <div class="flex flex-col items-end gap-0.5">
@@ -76,6 +76,9 @@
 
 <style>
   .list-default:hover .tag {
-    background-color: #ebe6e7;
+    background-color: var(--color-gray-200);
+  }
+  :root.dark .list-default:hover .tag {
+    background-color: var(--color-gray-900);
   }
 </style>
