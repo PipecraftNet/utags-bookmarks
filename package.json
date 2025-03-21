@@ -10,7 +10,7 @@
   "homepage": "https://github.com/utags/utags#readme",
   "type": "module",
   "scripts": {
-    "p": "prettier --write .",
+    "p": "prettier --write . && npx prettier@2.8.8 --config .prettierrc-markdown.cjs --write *.md",
     "lint": "run-s lint:*",
     "lint:code": "prettier --write . && xo --fix",
     "lint:type": "tsc --noemit",
