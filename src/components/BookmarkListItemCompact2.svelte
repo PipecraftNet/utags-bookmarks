@@ -8,7 +8,7 @@
   class="list-compact group relative mx-[6px] rounded-md bg-white p-2 transition-colors duration-50">
   <div class="flex items-center justify-between gap-2">
     <div class="flex items-center gap-2 truncate">
-      <Favicon {href} classNames="h-3 w-3 flex-none" />
+      <Favicon {href} classNames="h-4 w-4 flex-none" />
       <h3
         class="flex-none truncate text-sm font-normal text-gray-900 underline">
         <a {href} {title} target="_blank" rel="noopener">

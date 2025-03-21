@@ -106,5 +106,6 @@
     padding-right: var(--sidebar-padding-right);
     overflow: hidden;
     scroll-snap-align: var(--sidebar-scroll-snap-align);
+    padding-top: 20px;
   }
 </style>

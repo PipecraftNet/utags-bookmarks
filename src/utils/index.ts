@@ -50,8 +50,9 @@ export function humanizeUrl(url: string) {
 }
 
 export function formatDatetime(date: number, full = false) {
+  const locale = ['zh-CN', 'en-US', 'ja-JP', 'ko-KR'][1]
   return full
-    ? new Date(date).toLocaleString('zh-CN', {
+    ? new Date(date).toLocaleString(locale, {
         hour12: false,
         year: 'numeric',
         month: '2-digit',
@@ -60,7 +61,7 @@ export function formatDatetime(date: number, full = false) {
         minute: '2-digit',
         second: '2-digit',
       })
-    : new Date(date).toLocaleString('zh-CN', {
+    : new Date(date).toLocaleString(locale, {
         hour12: false,
         year: 'numeric',
         month: '2-digit',

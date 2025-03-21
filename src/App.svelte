@@ -8,11 +8,13 @@
   } from 'browser-extension-utils'
   import { cleanFilterString } from './utils/index.js'
   import { HASH_DELIMITER } from './constants.js'
+  import Header from './components/Header.svelte'
   import AddBookmark from './components/AddBookmark.svelte'
   import BookmarkList from './components/BookmarkList.svelte'
   import Sidebar from './components/Sidebar.svelte'
   import NavSidebar from './components/NavSidebar.svelte'
   import SavedFilters from './components/SavedFilters.svelte'
+  import Statistics from './components/Statistics.svelte'
   import Console from 'console-tagger'
 
   const console = new Console({
@@ -389,196 +391,154 @@
   }
 </script>
 
-<main class="container {$settings.sidebarPosition}-sidebar">
-  <div class="aside-area">
-    <NavSidebar />
+<main class="{$settings.sidebarPosition}-sidebar">
+  <Header {importData} {exportData} {clearAll} {showAddModal} {toggleView} />
+  <div class="container">
+    <div class="aside-area">
+      <NavSidebar />
 
-    <SavedFilters />
+      <SavedFilters />
 
-    <Sidebar
-      name="level1"
-      level="1"
-      paused={importProgress.total > 0}
-      filterString={filterStringLevel1}
-      input={originalBookmarks}
-      bind:output={filteredBookmarks1} />
-
-    {#if useLevel2 && importProgress.total === 0}
       <Sidebar
-        name="level2"
-        level="2"
+        name="level1"
+        level="1"
         paused={importProgress.total > 0}
-        filterString={filterStringLevel2}
-        input={filteredBookmarks1}
-        bind:output={filteredBookmarks2} />
+        filterString={filterStringLevel1}
+        input={originalBookmarks}
+        bind:output={filteredBookmarks1} />
 
-      {#if useLevel3}
+      {#if useLevel2 && importProgress.total === 0}
         <Sidebar
-          name="level3"
-          level="3"
+          name="level2"
+          level="2"
           paused={importProgress.total > 0}
-          filterString={filterStringLevel3}
-          input={filteredBookmarks2}
-          bind:output={filteredBookmarks3} />
-      {/if}
-    {/if}
-  </div>
-  <div class="vertical-seperator-line"></div>
-  <div class="content-area">
-    <div
-      style="flex-wrap: wrap"
-      class="toolbar mb-6 flex items-center justify-between rounded-lg border border-gray-200 bg-white/90 px-4 py-3 shadow-sm backdrop-blur-sm">
-      <div class="flex items-center gap-3">
-        <button
-          class="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-white transition-colors duration-200 hover:bg-blue-700"
-          onclick={importData}>
-          导入
-        </button>
-        <button
-          class="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-white transition-colors duration-200 hover:bg-blue-700"
-          onclick={exportData}>导出</button>
-        <button
-          class="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-white transition-colors duration-200 hover:bg-blue-700"
-          onclick={clearAll}>清空</button>
-        <button
-          class="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-white transition-colors duration-200 hover:bg-blue-700"
-          onclick={() => (showAddModal = true)}>+ 添加</button>
-        <button
-          class="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-white transition-colors duration-200 hover:bg-blue-700"
-          onclick={toggleView}>切换侧边栏位置</button>
-      </div>
+          filterString={filterStringLevel2}
+          input={filteredBookmarks1}
+          bind:output={filteredBookmarks2} />
 
-      <div class="flex items-center gap-2">
-        <span class="text-sm text-gray-700">排序方式: </span>
-        <div class="flex gap-1 rounded-md bg-gray-100 p-1">
-          <label
-            class="cursor-pointer rounded-md px-3 py-1.5 transition-colors {sortBy ===
-            'updated'
-              ? 'bg-blue-600 text-white'
-              : 'bg-white text-gray-700 hover:bg-gray-50'}">
-            <input
-              type="radio"
-              name="sort-by"
-              value="updated"
-              checked={sortBy === 'updated'}
-              class="hidden"
-              onchange={() => {
-                sortBy = 'updated'
-                updateFilteredBookmarks()
-              }} />
-            <span class="text-sm">更新时间</span>
-          </label>
-          <label
-            class="cursor-pointer rounded-md px-3 py-1.5 transition-colors {sortBy ===
-            'created'
-              ? 'bg-blue-600 text-white'
-              : 'bg-white text-gray-700 hover:bg-gray-50'}">
-            <input
-              type="radio"
-              name="sort-by"
-              value="created"
-              checked={sortBy === 'created'}
-              class="hidden"
-              onchange={() => {
-                sortBy = 'created'
-                updateFilteredBookmarks()
-              }} />
-            <span class="text-sm">创建时间</span>
-          </label>
+        {#if useLevel3}
+          <Sidebar
+            name="level3"
+            level="3"
+            paused={importProgress.total > 0}
+            filterString={filterStringLevel3}
+            input={filteredBookmarks2}
+            bind:output={filteredBookmarks3} />
+        {/if}
+      {/if}
+    </div>
+    <div class="vertical-seperator-line"></div>
+    <div class="content-area flex flex-col">
+      <div
+        style="flex-wrap: wrap"
+        class="toolbar mb-6 flex items-center justify-between rounded-lg border border-gray-200 bg-white/90 px-4 py-3 shadow-sm backdrop-blur-sm">
+        <Statistics
+          totalBookmarks={stats.totalBookmarks}
+          selectedTagsCount={stats.selectedTagsCount}
+          selectedDomainsCount={stats.selectedDomainsCount} />
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-gray-700">排序方式: </span>
+          <div class="flex gap-1 rounded-md bg-gray-100 p-1">
+            <label
+              class="cursor-pointer rounded-md px-3 py-1.5 transition-colors {sortBy ===
+              'updated'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-50'}">
+              <input
+                type="radio"
+                name="sort-by"
+                value="updated"
+                checked={sortBy === 'updated'}
+                class="hidden"
+                onchange={() => {
+                  sortBy = 'updated'
+                  updateFilteredBookmarks()
+                }} />
+              <span class="text-sm">更新时间</span>
+            </label>
+            <label
+              class="cursor-pointer rounded-md px-3 py-1.5 transition-colors {sortBy ===
+              'created'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-50'}">
+              <input
+                type="radio"
+                name="sort-by"
+                value="created"
+                checked={sortBy === 'created'}
+                class="hidden"
+                onchange={() => {
+                  sortBy = 'created'
+                  updateFilteredBookmarks()
+                }} />
+              <span class="text-sm">创建时间</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-gray-700">视图模式: </span>
+          <select
+            class="rounded-md bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm transition-colors duration-200 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+            bind:value={$settings.viewMode}>
+            <option value="list">列表</option>
+            <option value="compact">紧凑 1</option>
+            <option value="compact2">紧凑 2</option>
+            <option value="simple">极简 1</option>
+            <option value="simple2">极简 2</option>
+            <option value="simple3">极简 3</option>
+          </select>
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
-        <span class="text-sm text-gray-700">视图模式: </span>
-        <select
-          class="rounded-md bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm transition-colors duration-200 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
-          bind:value={$settings.viewMode}>
-          <option value="list">列表</option>
-          <option value="compact">紧凑 1</option>
-          <option value="compact2">紧凑 2</option>
-          <option value="simple">极简 1</option>
-          <option value="simple2">极简 2</option>
-          <option value="simple3">极简 3</option>
-        </select>
-      </div>
-    </div>
-
-    {#if importProgress.total > 0}
-      <div class="import-progress" out:fade={{ duration: 1000 }}>
-        导入进度: {importProgress.current}/{importProgress.total}
-        {#if importProgress.stats}
-          <div class="stats">
-            新增: {importProgress.stats.newBookmarks}书签・
-            {importProgress.stats.newTags.size}标签・
-            {importProgress.stats.newDomains.size}域名
-            <div class="total-stats">
-              总数: {Object.keys($bookmarks.data).length}书签・
-              {allTags.size}标签・{allDomains.size}域名
+      {#if importProgress.total > 0}
+        <div class="import-progress" out:fade={{ duration: 1000 }}>
+          导入进度: {importProgress.current}/{importProgress.total}
+          {#if importProgress.stats}
+            <div class="stats">
+              新增: {importProgress.stats.newBookmarks}书签・
+              {importProgress.stats.newTags.size}标签・
+              {importProgress.stats.newDomains.size}域名
+              <div class="total-stats">
+                总数: {Object.keys($bookmarks.data).length}书签・
+                {allTags.size}标签・{allDomains.size}域名
+              </div>
             </div>
+          {/if}
+        </div>
+      {/if}
+
+      <div class="bookmark-list shadow-lg">
+        <BookmarkList
+          filteredBookmarks={fullList
+            ? filteredBookmarks
+            : filteredBookmarks.slice(0, maxBookmarksPerPage)}
+          viewMode={$settings.viewMode}
+          bind:scrollTop />
+        {#if filteredBookmarks.length > maxBookmarksPerPage && !fullList}
+          <div
+            class="mt-4 flex items-center justify-center border-t-1 border-gray-200 bg-white/90 p-4 shadow-sm">
+            <div class="text-center">
+              <span class="text-sm leading-relaxed text-gray-600">
+                当前已加载前 100 个书签🔖 <br />
+                <span class="text-xs text-gray-500"
+                  >若您想查看全部书签，请点击‘展开所有’按钮</span>
+              </span>
+            </div>
+            <button
+              class="ml-4 flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm text-white shadow-sm transition-colors duration-200 hover:bg-blue-700"
+              onclick={() => {
+                fullList = true
+                scrollTop = document.querySelector('.bookmark-list').scrollTop
+              }}>
+              展开所有
+            </button>
           </div>
         {/if}
       </div>
-    {/if}
 
-    <div class="mb-3 flex gap-4 bg-white px-4 py-3">
-      <div class="flex items-center gap-2">
-        <span class="flex items-center text-lg text-blue-500">🔖</span>
-        <div class="flex flex-col justify-center">
-          <span class="text-xs font-medium text-gray-500">书签总数</span>
-          <span class="text-xl font-semibold text-gray-900">
-            {stats.totalBookmarks}</span>
-        </div>
-      </div>
-      <div class="my-auto h-full w-px self-stretch bg-gray-200"></div>
-      <div class="flex items-center gap-2">
-        <span class="flex items-center text-lg text-green-500">🏷️</span>
-        <div class="flex flex-col justify-center">
-          <span class="text-xs font-medium text-gray-500">使用标签</span>
-          <span class="text-xl font-semibold text-gray-900">
-            {stats.selectedTagsCount}</span>
-        </div>
-      </div>
-      <div class="my-auto h-full w-px self-stretch bg-gray-200"></div>
-      <div class="flex items-center gap-2">
-        <span class="flex items-center text-lg text-purple-500">🌐</span>
-        <div class="flex flex-col justify-center">
-          <span class="text-xs font-medium text-gray-500">来源域名</span>
-          <span class="text-xl font-semibold text-gray-900">
-            {stats.selectedDomainsCount}</span>
-        </div>
-      </div>
+      <AddBookmark bind:show={showAddModal} />
     </div>
-
-    <div class="bookmark-list shadow-lg">
-      <BookmarkList
-        filteredBookmarks={fullList
-          ? filteredBookmarks
-          : filteredBookmarks.slice(0, maxBookmarksPerPage)}
-        viewMode={$settings.viewMode}
-        bind:scrollTop />
-      {#if filteredBookmarks.length > maxBookmarksPerPage && !fullList}
-        <div
-          class="mt-4 flex items-center justify-center border-t-1 border-gray-200 bg-white/90 p-4 shadow-sm">
-          <div class="text-center">
-            <span class="text-sm leading-relaxed text-gray-600">
-              当前已加载前 100 个书签🔖 <br />
-              <span class="text-xs text-gray-500"
-                >若您想查看全部书签，请点击‘展开所有’按钮</span>
-            </span>
-          </div>
-          <button
-            class="ml-4 flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm text-white shadow-sm transition-colors duration-200 hover:bg-blue-700"
-            onclick={() => {
-              fullList = true
-              scrollTop = document.querySelector('.bookmark-list').scrollTop
-            }}>
-            展开所有
-          </button>
-        </div>
-      {/if}
-    </div>
-
-    <AddBookmark bind:show={showAddModal} />
   </div>
 </main>
 
@@ -615,6 +575,10 @@
     --sidebar-scroll-snap-align: start;
   }
 
+  main {
+    background-color: #f6f8fc;
+  }
+
   .container {
     display: flex;
     justify-content: var(--container-justify-content);
@@ -622,8 +586,10 @@
     max-width: min(calc(100vw - 100px), 1842px);
     height: 100vh;
     margin: 0 auto;
-    padding: 20px 20px 0;
+    padding: 57px 20px 0;
+    position: relative;
     overflow: hidden;
+    background-color: white;
   }
 
   .aside-area {
@@ -637,13 +603,13 @@
     order: var(--aside-area-order);
     margin-left: var(--aside-area-margin-left);
     margin-right: var(--aside-area-margin-right);
-    padding-bottom: 20px;
+    /* padding-bottom: 20px; */
     scroll-snap-type: x mandatory;
   }
 
   .vertical-seperator-line {
     width: 0px;
-    height: calc(100% - 20px);
+    /* height: calc(100% - 20px); */
     border-right: none;
     border-left: var(--seperator-line);
     box-shadow: 0px -15px 15px 15px white;
@@ -655,6 +621,7 @@
   .content-area {
     flex: 1;
     width: calc(100% - var(--sidebar-width) * 2 - 20px);
+    padding-top: 20px;
     /* max-width: 900px;
     min-width: 900px; */
   }
@@ -670,7 +637,8 @@
   }
 
   .bookmark-list {
-    height: calc(100vh - 198px);
+    /* height: calc(100% - 198px); */
     overflow-y: auto;
+    margin-left: 2px;
   }
 </style>
