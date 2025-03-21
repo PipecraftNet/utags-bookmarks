@@ -626,7 +626,7 @@
     /* height: calc(100% - 20px); */
     border-right: none;
     border-left: var(--seperator-line);
-    box-shadow: 0px -15px 15px 15px var(-shadow-color);
+    box-shadow: 0px -15px 15px 15px var(--shadow-color);
     display: block;
     z-index: 2;
     order: var(--vertical-seperator-line-order);
