@@ -6,6 +6,7 @@
     addEventListener,
     extendHistoryApi,
   } from 'browser-extension-utils'
+  import Console from 'console-tagger'
   import { cleanFilterString } from './utils/index.js'
   import { HASH_DELIMITER } from './constants.js'
   import Header from './components/Header.svelte'
@@ -15,7 +16,7 @@
   import NavSidebar from './components/NavSidebar.svelte'
   import SavedFilters from './components/SavedFilters.svelte'
   import Statistics from './components/Statistics.svelte'
-  import Console from 'console-tagger'
+  import { settings } from './stores.ts'
 
   const console = new Console({
     prefix: 'app',
@@ -29,12 +30,6 @@
       databaseVersion: 3,
       created: Date.now(),
     },
-  })
-  const settings = persisted('utags-settings', {
-    sortBy: 'updated',
-    sidebarPosition: 'right',
-    viewMode: 'compact',
-    isFirstRun: true,
   })
 
   $effect(() => {
@@ -375,21 +370,8 @@
     input.click()
   }
 
-  function toggleView() {
-    $settings.sidebarPosition =
-      $settings.sidebarPosition === 'right' ? 'left' : 'right'
-
-    setTimeout(() => {
-      document.querySelector('.aside-area aside:last-of-type').scrollIntoView({
-        behavior: 'auto',
-        block: 'start',
-        inline: $settings.sidebarPosition === 'right' ? 'start' : 'end',
-      })
-    }, 10)
-  }
-
   $effect(() => {
-    document.documentElement.dataset.theme = $settings.skin
+    document.documentElement.dataset.theme = $settings.skin || 'skin1'
   })
 </script>
 
@@ -399,7 +381,6 @@
     {exportData}
     {clearAll}
     bind:showAddModal
-    {toggleView}
     bind:skin={$settings.skin} />
   <div class="container bg-white dark:bg-black">
     <div class="aside-area">

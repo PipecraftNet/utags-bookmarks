@@ -1,11 +1,17 @@
 <script>
   import { onMount } from 'svelte'
+  import { settings } from '../stores.ts'
   let { type } = $props()
-  let theme = $state(localStorage.getItem('theme') || 'system')
+  let theme = $state($settings.theme || 'system')
+
+  $effect(() => {
+    // 同步多个窗口的状态
+    theme = $settings.theme || 'system'
+  })
 
   $effect(() => {
     console.log('call $effect')
-    localStorage.setItem('theme', theme)
+    $settings.theme = theme
     const root = document.documentElement
 
     if (theme === 'system') {
@@ -41,7 +47,7 @@
     id="headlessui-radiogroup-:Rcaulb:"
     role="radiogroup">
     <button
-      class="rounded-full p-1.5 *:size-7 data-checked:bg-white data-checked:ring data-checked:inset-ring data-checked:ring-gray-950/10 data-checked:inset-ring-white/10 sm:p-0 dark:data-checked:bg-gray-700 dark:data-checked:text-white dark:data-checked:ring-transparent"
+      class="rounded-full p-1.5 *:size-7 data-checked:bg-white data-checked:ring data-checked:inset-ring data-checked:ring-gray-950/10 data-checked:inset-ring-white/10 sm:p-0 dark:data-checked:bg-gray-800 dark:data-checked:text-white dark:data-checked:ring-transparent"
       aria-label="System theme"
       id="headlessui-radio-:Rdcaulb:"
       role="radio"
@@ -66,7 +72,7 @@
         ></svg
       ></button
     ><button
-      class="rounded-full p-1.5 *:size-7 data-checked:bg-white data-checked:ring data-checked:inset-ring data-checked:ring-gray-950/10 data-checked:inset-ring-white/10 sm:p-0 dark:data-checked:bg-gray-700 dark:data-checked:text-white dark:data-checked:ring-transparent"
+      class="rounded-full p-1.5 *:size-7 data-checked:bg-white data-checked:ring data-checked:inset-ring data-checked:ring-gray-950/10 data-checked:inset-ring-white/10 sm:p-0 dark:data-checked:bg-gray-800 dark:data-checked:text-white dark:data-checked:ring-transparent"
       aria-label="Light theme"
       id="headlessui-radio-:Rlcaulb:"
       role="radio"
@@ -107,7 +113,7 @@
         ></svg
       ></button
     ><button
-      class="rounded-full p-1.5 *:size-7 data-checked:bg-white data-checked:ring data-checked:inset-ring data-checked:ring-gray-950/10 data-checked:inset-ring-white/10 sm:p-0 dark:data-checked:bg-gray-700 dark:data-checked:text-white dark:data-checked:ring-transparent"
+      class="rounded-full p-1.5 *:size-7 data-checked:bg-white data-checked:ring data-checked:inset-ring data-checked:ring-gray-950/10 data-checked:inset-ring-white/10 sm:p-0 dark:data-checked:bg-gray-800 dark:data-checked:text-white dark:data-checked:ring-transparent"
       aria-label="Dark theme"
       id="headlessui-radio-:Rtcaulb:"
       role="radio"

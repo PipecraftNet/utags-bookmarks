@@ -3,6 +3,8 @@
   import ThemeSwitcher from './ThemeSwitcher.svelte'
   import { $ as _$ } from 'browser-extension-utils'
   import { initFocusTrap } from 'focus-trap-lite'
+  import { settings } from '../stores.ts'
+
   let { showSettings = $bindable() } = $props()
 
   $effect(() => {
@@ -22,6 +24,17 @@
 
     document.addEventListener('keydown', keydownHandler)
     return () => document.removeEventListener('keydown', keydownHandler)
+  })
+
+  $effect(() => {
+    const position = $settings.sidebarPosition
+    setTimeout(() => {
+      document.querySelector('.aside-area aside:last-of-type')?.scrollIntoView({
+        behavior: 'auto',
+        block: 'start',
+        inline: position === 'right' ? 'start' : 'end',
+      })
+    }, 10)
   })
 </script>
 
@@ -68,16 +81,46 @@
         </button>
       </div>
 
-      <div class="space-y-6">
-        <div class="setting-group">
-          <h3 class="mb-4 text-lg font-medium text-gray-700 dark:text-gray-300">
+      <div class="gap-y-8">
+        <div class="setting-group gap-y-6">
+          <h3
+            class="mb-6 text-xl font-semibold text-gray-900 dark:text-gray-100">
             界面设置
           </h3>
-          <div class="space-y-4">
-            <!-- 这里可以添加具体的设置项 -->
-            <div class="flex items-center justify-between">
-              <span class="text-gray-600 dark:text-gray-400">主题</span>
+          <div class="gap-y-4">
+            <div class="flex items-center justify-between px-1 py-1.5">
+              <span class="text-gray-700 dark:text-gray-300">主题</span>
               <ThemeSwitcher type="button" />
+            </div>
+          </div>
+          <div class="gap-y-4">
+            <div class="flex items-center justify-between px-1 py-1.5">
+              <span class="text-gray-700 dark:text-gray-300">筛选栏位置</span>
+              <div
+                class="flex gap-2 rounded-lg bg-gray-100 p-1 shadow-inner dark:bg-gray-700/90 dark:shadow-gray-900/30">
+                <label class="flex-1">
+                  <input
+                    type="radio"
+                    class="peer absolute h-0 w-0 opacity-0"
+                    value="left"
+                    bind:group={$settings.sidebarPosition} />
+                  <span
+                    class="block cursor-pointer rounded-md px-4 py-2 text-center text-sm transition-colors peer-checked:bg-white peer-checked:text-gray-800 dark:peer-checked:bg-gray-600 dark:peer-checked:text-gray-100">
+                    左侧
+                  </span>
+                </label>
+                <label class="flex-1">
+                  <input
+                    type="radio"
+                    class="peer absolute h-0 w-0 opacity-0"
+                    value="right"
+                    bind:group={$settings.sidebarPosition} />
+                  <span
+                    class="block cursor-pointer rounded-md px-4 py-2 text-center text-sm transition-colors peer-checked:bg-white peer-checked:text-gray-800 dark:peer-checked:bg-gray-600 dark:peer-checked:text-gray-100">
+                    右侧
+                  </span>
+                </label>
+              </div>
             </div>
           </div>
         </div>
@@ -88,7 +131,7 @@
 
 <style global>
   .settings-sidebar {
-    border-left: 1px solid rgba(0, 0, 0, 0.1);
+    border-left: 1px solid rgba(0, 0, 0, 0.06);
   }
 
   :root.dark .settings-sidebar {

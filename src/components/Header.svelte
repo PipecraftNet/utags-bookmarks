@@ -8,7 +8,6 @@
     importData,
     exportData,
     clearAll,
-    toggleView,
     skin = $bindable(),
   } = $props()
 
@@ -68,10 +67,6 @@
     <button
       class="rounded-md px-4 py-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
       onclick={() => (showAddModal = true)}>+ 添加</button>
-
-    <button
-      class="rounded-md px-4 py-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-      onclick={toggleView}>切换布局</button>
     <div class="flex items-center gap-2">
       <span class="text-sm text-gray-700 dark:text-gray-200">主题: </span>
       <select
@@ -106,6 +101,7 @@
 </div>
 
 <SettingsSidebar bind:showSettings />
+<div class="for-init hidden"><ThemeSwitcher /></div>
 
 <style>
   .header {
