@@ -341,7 +341,7 @@
     padding-left: var(--sidebar-padding-left);
     padding-right: var(--sidebar-padding-right);
     scroll-snap-align: var(--sidebar-scroll-snap-align);
-    padding-top: 20px;
+    padding-top: var(--sidebar-padding-top, 20px);
     padding-bottom: 20px;
   }
 

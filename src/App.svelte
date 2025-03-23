@@ -32,8 +32,6 @@
   })
   const settings = persisted('utags-settings', {
     sortBy: 'updated',
-    showTags: true,
-    showDomains: true,
     sidebarPosition: 'right',
     viewMode: 'compact',
     isFirstRun: true,
@@ -389,10 +387,20 @@
       })
     }, 10)
   }
+
+  $effect(() => {
+    document.documentElement.dataset.theme = $settings.skin
+  })
 </script>
 
 <main class="{$settings.sidebarPosition}-sidebar">
-  <Header {importData} {exportData} {clearAll} bind:showAddModal {toggleView} />
+  <Header
+    {importData}
+    {exportData}
+    {clearAll}
+    bind:showAddModal
+    {toggleView}
+    bind:skin={$settings.skin} />
   <div class="container bg-white dark:bg-black">
     <div class="aside-area">
       <NavSidebar />
@@ -617,19 +625,24 @@
     order: var(--aside-area-order);
     margin-left: var(--aside-area-margin-left);
     margin-right: var(--aside-area-margin-right);
-    /* padding-bottom: 20px; */
+    padding-bottom: var(--vertical-seperator-line-padding-bottom, 0px);
+    padding-top: var(--vertical-seperator-line-padding-top, 0px);
     scroll-snap-type: x mandatory;
   }
 
   .vertical-seperator-line {
     width: 0px;
-    /* height: calc(100% - 20px); */
+    height: calc(
+      100% - var(--vertical-seperator-line-padding-bottom, 0px) -
+        var(--vertical-seperator-line-padding-top, 0px)
+    );
     border-right: none;
     border-left: var(--seperator-line);
     box-shadow: 0px -15px 15px 15px var(--shadow-color);
     display: block;
     z-index: 2;
     order: var(--vertical-seperator-line-order);
+    align-self: var(--vertical-seperator-line-align-self);
   }
 
   .content-area {
@@ -654,5 +667,20 @@
     /* height: calc(100% - 198px); */
     overflow-y: auto;
     margin-left: 2px;
+  }
+
+  :root[data-theme='skin1'] {
+    --sidebar-padding-top: 20px;
+  }
+  :root[data-theme='skin2'] {
+    --vertical-seperator-line-padding-bottom: 20px;
+    --vertical-seperator-line-align-self: flex-start;
+    --sidebar-padding-top: 20px;
+  }
+  :root[data-theme='skin3'] {
+    --vertical-seperator-line-padding-bottom: 20px;
+    --vertical-seperator-line-padding-top: 20px;
+    --vertical-seperator-line-align-self: center;
+    --sidebar-padding-top: 0px;
   }
 </style>

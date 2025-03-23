@@ -1,5 +1,38 @@
 <script>
-  let { theme = $bindable(), type } = $props()
+  import { onMount } from 'svelte'
+  let { type } = $props()
+  let theme = $state(localStorage.getItem('theme') || 'system')
+
+  $effect(() => {
+    console.log('call $effect')
+    localStorage.setItem('theme', theme)
+    const root = document.documentElement
+
+    if (theme === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+      root.classList.toggle('dark', mediaQuery.matches)
+      root.style.colorScheme = mediaQuery.matches ? 'dark' : 'light'
+    } else {
+      root.classList.toggle('dark', theme === 'dark')
+      root.style.colorScheme = theme
+    }
+  })
+
+  onMount(() => {
+    console.log('call onMount')
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    const systemThemeHandler = () => {
+      if (theme === 'system') {
+        document.documentElement.classList.toggle('dark', mediaQuery.matches)
+        document.documentElement.style.colorScheme = mediaQuery.matches
+          ? 'dark'
+          : 'light'
+      }
+    }
+
+    mediaQuery.addEventListener('change', systemThemeHandler)
+    return () => mediaQuery.removeEventListener('change', systemThemeHandler)
+  })
 </script>
 
 {#if type === 'button'}
@@ -13,7 +46,7 @@
       id="headlessui-radio-:Rdcaulb:"
       role="radio"
       aria-checked={theme === 'system'}
-      tabindex="-1"
+      tabindex="0"
       data-headlessui-state={theme === 'system' ? 'checked' : ''}
       data-checked={theme === 'system' ? '' : null}
       onclick={() => {
@@ -38,7 +71,7 @@
       id="headlessui-radio-:Rlcaulb:"
       role="radio"
       aria-checked={theme === 'light'}
-      tabindex="-1"
+      tabindex="0"
       data-headlessui-state={theme === 'light' ? 'checked' : ''}
       data-checked={theme === 'light' ? '' : null}
       onclick={() => {
