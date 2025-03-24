@@ -4,6 +4,7 @@
   import { $ as _$ } from 'browser-extension-utils'
   import { HASH_DELIMITER } from '../constants.js'
   import { parseFilterString, convertToFilterString } from '../utils/index.js'
+  import FilterCheckbox from './FilterCheckbox.svelte'
 
   const console = new Console({
     prefix: 'composite-filters-level' + level,
@@ -291,9 +292,15 @@
           class="absolute top-1/2 right-2 -translate-y-1/2 rounded-full bg-gray-100 p-1 transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
           onclick={() => (searchKeyword = '')}
           aria-label="清除搜索关键词">
-          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24">
+          <svg
+            class="h-3.5 w-3.5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1">
             <path
               fill="currentColor"
+              stroke="currentColor"
               d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
           </svg>
         </button>
@@ -312,7 +319,9 @@
           <div class="flex items-center gap-2">
             {#if selectedTags.size > 0}
               <button
-                class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs font-medium text-white"
+                class="flex h-5 w-5 items-center justify-center rounded-full {showOnlySelectedTags
+                  ? 'bg-blue-500'
+                  : 'bg-gray-500'} text-xs font-medium text-white"
                 onclick={() => (showOnlySelectedTags = !showOnlySelectedTags)}>
                 {selectedTags.size}
               </button>
@@ -350,21 +359,13 @@
           </div>
         </h4>
         {#each Array.from(tagCounts).sort((a, b) => b[1] - a[1]) as [tag, count]}
-          <label
-            data-key={tag}
-            data-checked={selectedTags.has(tag) ? '' : null}
-            class="flex items-center gap-2 truncate rounded-md px-1 py-1.5 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800">
-            <input
-              type="checkbox"
-              class="form-checkbox h-3.5 w-3.5 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
-              checked={selectedTags.has(tag)}
-              onchange={() => {
-                toggleTag(tag)
-                // selectedTags = selectedTagss
-              }} />
-            <span class="truncate">{tag}</span>
-            <span class="text-xs font-medium text-gray-400">{count}</span>
-          </label>
+          <FilterCheckbox
+            value={tag}
+            checked={selectedTags.has(tag)}
+            {count}
+            onchange={() => {
+              toggleTag(tag)
+            }} />
         {/each}
       </div>
     {/if}
@@ -379,7 +380,9 @@
           <div class="flex items-center gap-2">
             {#if selectedDomains.size > 0}
               <button
-                class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs font-medium text-white"
+                class="flex h-5 w-5 items-center justify-center rounded-full {showOnlySelectedDomains
+                  ? 'bg-blue-500'
+                  : 'bg-gray-500'} text-xs font-medium text-white"
                 onclick={() =>
                   (showOnlySelectedDomains = !showOnlySelectedDomains)}>
                 {selectedDomains.size}
@@ -419,22 +422,13 @@
           </div>
         </h4>
         {#each Array.from(domainCounts).sort((a, b) => b[1] - a[1]) as [domain, count]}
-          <label
-            data-key={domain}
-            data-checked={selectedDomains.has(domain) ? '' : null}
-            class="flex items-center gap-2 truncate rounded-md px-1 py-1.5 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800">
-            <input
-              type="checkbox"
-              class="form-checkbox h-3.5 w-3.5 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
-              checked={selectedDomains.has(domain)}
-              onchange={() => {
-                toggleDomain(domain)
-                // selectedDomains = selectedDomains
-              }} />
-            <span class="truncate">{domain}</span>
-            <span class="text-xs font-medium text-gray-400 dark:text-gray-500"
-              >{count}</span>
-          </label>
+          <FilterCheckbox
+            value={domain}
+            checked={selectedDomains.has(domain)}
+            {count}
+            onchange={() => {
+              toggleDomain(domain)
+            }} />
         {/each}
       </div>
     {/if}
@@ -470,15 +464,14 @@
     min-height: calc(40%);
   }
 
-  .filter-group-tags[data-showOnlySelectedTags] {
-    label:not([data-checked]) {
-      display: none;
-    }
+  .filter-group-tags[data-showOnlySelectedTags]
+    :global(label:not([data-checked])) {
+    display: none;
   }
-  .filter-group-domains[data-showOnlySelectedDomains] {
-    label:not([data-checked]) {
-      display: none;
-    }
+
+  .filter-group-domains[data-showOnlySelectedDomains]
+    :global(label:not([data-checked])) {
+    display: none;
   }
 
   .filter-group h4 {
