@@ -7,7 +7,10 @@
 
   const console = new Console({
     prefix: 'composite-filters-level' + level,
-    color: { line: 'white', background: ['green', 'blue', 'purple'][level - 1] },
+    color: {
+      line: 'white',
+      background: ['green', 'blue', 'purple'][level - 1],
+    },
   })
 
   let { level, input, output = $bindable(), filterString, paused } = $props()
@@ -21,6 +24,10 @@
   let tagCounts = $state(new Map())
   let domainCounts = $state(new Map())
   let statesInited = false
+  let showOnlySelectedTags = $state(false)
+  let showOnlySelectedDomains = $state(false)
+  let multiSelectTagsMode = $state(false)
+  let multiSelectDomainsMode = $state(false)
 
   function scrollTagIntoView(tag) {
     const element = _$(
@@ -92,7 +99,7 @@
       console.log(
         `last filter string:`,
         `[${decodeURIComponent(currentFilterString)}]`,
-        '\n                  new filter string:',
+        '\n                            new filter string:',
         `[${decodeURIComponent(filterString)}]`
       )
       if (currentFilterString === filterString) {
@@ -172,6 +179,12 @@
       searchKeyword = filter.searchKeyword
       selectedTags = filter.selectedTags
       selectedDomains = filter.selectedDomains
+      if (filter.selectedTags.size > 1) {
+        multiSelectTagsMode = true
+      }
+      if (filter.selectedDomains.size > 1) {
+        multiSelectDomainsMode = true
+      }
     } else {
       searchKeyword = ''
       selectedTags = new Set()
@@ -219,21 +232,40 @@
       output = [...input]
     }
 
+    if (selectedTags.size === 0) {
+      showOnlySelectedTags = false
+    }
+    if (selectedDomains.size === 0) {
+      showOnlySelectedDomains = false
+    }
+
     setTimeout(() => {
       window.dispatchEvent(new CustomEvent('filterUpdated'))
     }, 5)
   })
 
   function toggleTag(tag) {
-    selectedTags = selectedTags.has(tag)
-      ? new Set([...selectedTags].filter((t) => t !== tag))
-      : new Set([...selectedTags, tag])
+    if (multiSelectTagsMode) {
+      // 多选模式
+      selectedTags = selectedTags.has(tag)
+        ? new Set([...selectedTags].filter((t) => t !== tag))
+        : new Set([...selectedTags, tag])
+    } else {
+      // 单选模式
+      selectedTags = selectedTags.has(tag) ? new Set() : new Set([tag])
+    }
   }
 
   function toggleDomain(domain) {
-    selectedDomains = selectedDomains.has(domain)
-      ? new Set([...selectedDomains].filter((d) => d !== domain))
-      : new Set([...selectedDomains, domain])
+    if (multiSelectDomainsMode) {
+      selectedDomains = selectedDomains.has(domain)
+        ? new Set([...selectedDomains].filter((d) => d !== domain))
+        : new Set([...selectedDomains, domain])
+    } else {
+      selectedDomains = selectedDomains.has(domain)
+        ? new Set()
+        : new Set([domain])
+    }
   }
 </script>
 
@@ -271,14 +303,56 @@
 
   <div class="filter-controls flex h-full flex-col gap-4">
     {#if tagCounts && tagCounts.size}
-      <div class="filter-group filter-group-tags relative overflow-y-auto">
+      <div
+        class="filter-group filter-group-tags relative overflow-y-auto"
+        data-showOnlySelectedTags={showOnlySelectedTags ? '' : null}>
         <h4
-          class="sticky top-0 m-0 border-b border-gray-100 bg-white py-2 text-sm font-medium text-gray-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200">
-          标签筛选
+          class="sticky top-0 m-0 flex items-center justify-between border-b border-gray-100 bg-white py-2 text-sm font-medium text-gray-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200">
+          <span>标签筛选</span>
+          <div class="flex items-center gap-2">
+            {#if selectedTags.size > 0}
+              <button
+                class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs font-medium text-white"
+                onclick={() => (showOnlySelectedTags = !showOnlySelectedTags)}>
+                {selectedTags.size}
+              </button>
+            {/if}
+            <button
+              class="mr-2 flex h-6 w-6 items-center justify-center rounded-md transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
+              title="切换单选/多选模式"
+              onclick={() => (multiSelectTagsMode = !multiSelectTagsMode)}>
+              {#if multiSelectTagsMode}
+                <svg
+                  class="h-4 w-4 text-blue-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              {:else}
+                <svg
+                  class="h-4 w-4 text-gray-600 dark:text-gray-300"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7" />
+                </svg>
+              {/if}
+            </button>
+          </div>
         </h4>
         {#each Array.from(tagCounts).sort((a, b) => b[1] - a[1]) as [tag, count]}
           <label
             data-key={tag}
+            data-checked={selectedTags.has(tag) ? '' : null}
             class="flex items-center gap-2 truncate rounded-md px-1 py-1.5 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800">
             <input
               type="checkbox"
@@ -296,14 +370,58 @@
     {/if}
 
     {#if domainCounts && domainCounts.size}
-      <div class="filter-group filter-group-domains relative overflow-y-auto">
+      <div
+        class="filter-group filter-group-domains relative overflow-y-auto"
+        data-showOnlySelectedDomains={showOnlySelectedDomains ? '' : null}>
         <h4
-          class="sticky top-0 m-0 border-b border-gray-100 bg-white py-2 text-sm font-medium text-gray-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200">
-          域名筛选
+          class="sticky top-0 m-0 flex items-center justify-between border-b border-gray-100 bg-white py-2 text-sm font-medium text-gray-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200">
+          <span>域名筛选</span>
+          <div class="flex items-center gap-2">
+            {#if selectedDomains.size > 0}
+              <button
+                class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs font-medium text-white"
+                onclick={() =>
+                  (showOnlySelectedDomains = !showOnlySelectedDomains)}>
+                {selectedDomains.size}
+              </button>
+            {/if}
+            <button
+              class="mr-2 flex h-6 w-6 items-center justify-center rounded-md transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
+              title="切换域名单选/多选模式"
+              onclick={() =>
+                (multiSelectDomainsMode = !multiSelectDomainsMode)}>
+              {#if multiSelectDomainsMode}
+                <svg
+                  class="h-4 w-4 text-blue-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              {:else}
+                <svg
+                  class="h-4 w-4 text-gray-600 dark:text-gray-300"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7" />
+                </svg>
+              {/if}
+            </button>
+          </div>
         </h4>
         {#each Array.from(domainCounts).sort((a, b) => b[1] - a[1]) as [domain, count]}
           <label
             data-key={domain}
+            data-checked={selectedDomains.has(domain) ? '' : null}
             class="flex items-center gap-2 truncate rounded-md px-1 py-1.5 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800">
             <input
               type="checkbox"
@@ -345,8 +463,22 @@
     scroll-padding-top: 55px;
   }
 
+  .filter-group-tags {
+    min-height: calc(40%);
+  }
   .filter-group-domains {
     min-height: calc(40%);
+  }
+
+  .filter-group-tags[data-showOnlySelectedTags] {
+    label:not([data-checked]) {
+      display: none;
+    }
+  }
+  .filter-group-domains[data-showOnlySelectedDomains] {
+    label:not([data-checked]) {
+      display: none;
+    }
   }
 
   .filter-group h4 {
