@@ -1,27 +1,18 @@
 <script>
   import { fade } from 'svelte/transition'
   import Console from 'console-tagger'
-  import { splitTags, trimTitle } from 'utags-utils'
   import { $ as _$ } from 'browser-extension-utils'
-  import { HASH_DELIMITER, FILTER_DELIMITER } from '../constants.js'
+  import { HASH_DELIMITER } from '../constants.js'
   import { parseFilterString, convertToFilterString } from '../utils/index.js'
 
   const console = new Console({
-    prefix: 'sidebar-level' + level,
-    color: { line: 'white', background: ['green', 'blue', 'black'][level - 1] },
+    prefix: 'composite-filters-level' + level,
+    color: { line: 'white', background: ['green', 'blue', 'purple'][level - 1] },
   })
 
-  let {
-    name,
-    level,
-    input,
-    output = $bindable(),
-    filterString,
-    paused,
-  } = $props()
+  let { level, input, output = $bindable(), filterString, paused } = $props()
 
   console.log(`component loaded`)
-  // #tag1,tag2/domain1,domain2/keywod#tag3,tag4/domain3,domain4/keyword2#...
 
   // 筛选相关状态
   let searchKeyword = $state('')
@@ -33,7 +24,7 @@
 
   function scrollTagIntoView(tag) {
     const element = _$(
-      `.sidebar-${level} .filter-group-tags label[data-key="${tag}"]`
+      `.composite-filters-${level} .filter-group-tags label[data-key="${tag}"]`
     )
     if (element) {
       element.scrollIntoView({
@@ -45,7 +36,7 @@
 
   function scrollDomainIntoView(domain) {
     const element = _$(
-      `.sidebar-${level} .filter-group-domains label[data-key="${domain}"]`
+      `.composite-filters-${level} .filter-group-domains label[data-key="${domain}"]`
     )
     if (element) {
       element.scrollIntoView({
@@ -247,7 +238,7 @@
 </script>
 
 <aside
-  class="sidebar sidebar-{level} flex flex-col gap-4"
+  class="composite-filters composite-filters-{level} flex flex-col gap-4"
   out:fade={{ duration: 500 }}>
   <div class="flex flex-col gap-2">
     <button
@@ -333,7 +324,7 @@
 </aside>
 
 <style>
-  .sidebar {
+  .composite-filters {
     width: var(--sidebar-width);
     min-width: var(--sidebar-width);
     border-right: var(--sidebar-border-right);

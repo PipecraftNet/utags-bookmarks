@@ -12,7 +12,7 @@
   import Header from './components/Header.svelte'
   import AddBookmark from './components/AddBookmark.svelte'
   import BookmarkList from './components/BookmarkList.svelte'
-  import Sidebar from './components/Sidebar.svelte'
+  import CompositeFilters from './components/CompositeFilters.svelte'
   import NavSidebar from './components/NavSidebar.svelte'
   import SavedFilters from './components/SavedFilters.svelte'
   import Statistics from './components/Statistics.svelte'
@@ -193,7 +193,7 @@
         'scrollIntoView',
         useLevel2,
         useLevel3,
-        document.querySelectorAll('.sidebar').length
+        document.querySelectorAll('.composite-filters').length
       )
       document.querySelector('.bookmark-list').scrollTo(0, scrollTop)
       document.querySelector('.bookmark-list > *').scrollTo(0, scrollTop)
@@ -388,8 +388,7 @@
 
       <SavedFilters />
 
-      <Sidebar
-        name="level1"
+      <CompositeFilters
         level="1"
         paused={importProgress.total > 0}
         filterString={filterStringLevel1}
@@ -397,8 +396,7 @@
         bind:output={filteredBookmarks1} />
 
       {#if useLevel2 && importProgress.total === 0}
-        <Sidebar
-          name="level2"
+        <CompositeFilters
           level="2"
           paused={importProgress.total > 0}
           filterString={filterStringLevel2}
@@ -406,8 +404,7 @@
           bind:output={filteredBookmarks2} />
 
         {#if useLevel3}
-          <Sidebar
-            name="level3"
+          <CompositeFilters
             level="3"
             paused={importProgress.total > 0}
             filterString={filterStringLevel3}
