@@ -2,7 +2,9 @@
   import { fade } from 'svelte/transition'
   import { persisted } from 'svelte-persisted-store'
   import { splitTags, trimTitle } from 'utags-utils'
+  import { initFocusTrap } from 'focus-trap-lite'
   let { show = $bindable(false) } = $props()
+  let modalElement = $state()
 
   let url = $state('')
   let title = $state('')
@@ -106,7 +108,9 @@
 
   $effect(() => {
     if (show) {
+      initFocusTrap(modalElement)
       document.addEventListener('keydown', handleKeydown)
+      document.getElementById('url-input').focus()
     } else {
       lastUrl = undefined
       document.removeEventListener('keydown', handleKeydown)
@@ -118,6 +122,7 @@
   <div
     role="dialog"
     aria-label="添加新书签对话框"
+    bind:this={modalElement}
     tabindex="0"
     class="fixed inset-0 z-50 flex h-[100vh] items-center justify-center bg-black/50 dark:bg-gray-900/90">
     <div

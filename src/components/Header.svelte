@@ -15,7 +15,7 @@
 </script>
 
 <div
-  class="header fixed top-0 right-0 left-0 z-50 flex h-14 items-center justify-between border-b border-(color:--seperator-line-color) bg-white px-4 shadow-xs dark:bg-black">
+  class="header fixed top-0 right-0 left-0 z-50 flex h-14 items-center justify-between border-b border-(color:--seperator-line-color) bg-white px-4 shadow-sm dark:bg-black">
   <!-- 桌面端导航 -->
   <div class="hidden md:flex md:items-center md:gap-6">
     <span
@@ -67,7 +67,7 @@
     <button
       class="rounded-md px-4 py-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
       onclick={() => (showAddModal = true)}>+ 添加</button>
-    <div class="flex items-center gap-2">
+    <div class="hidden flex items-center gap-2">
       <span class="text-sm text-gray-700 dark:text-gray-200">主题: </span>
       <select
         class="rounded-md bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm transition-colors duration-200 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"

@@ -198,10 +198,10 @@
       document.querySelector('.bookmark-list').scrollTo(0, scrollTop)
       document.querySelector('.bookmark-list > *').scrollTo(0, scrollTop)
       const selector = useLevel3
-        ? '.aside-area aside:nth-child(5)'
+        ? '.aside-area aside:nth-of-type(3)'
         : useLevel2
-          ? '.aside-area aside:nth-child(4)'
-          : '.aside-area aside:nth-child(3)'
+          ? '.aside-area aside:nth-of-type(2)'
+          : '.aside-area aside:nth-of-type(1)'
       const lastSidebar = _$(selector)
       console.log(lastSidebar)
       if (lastSidebar) {
@@ -384,8 +384,6 @@
     bind:skin={$settings.skin} />
   <div class="container bg-white dark:bg-black">
     <div class="aside-area">
-      <NavSidebar />
-
       <SavedFilters />
 
       <CompositeFilters
@@ -576,7 +574,7 @@
   }
 
   main {
-    background-color: var(--main-background-color);
+    /* background-color: var(--main-background-color); */
   }
 
   .container {
