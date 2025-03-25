@@ -210,7 +210,9 @@
 <Modal
   title={isEditing ? '编辑筛选器收藏' : '收藏当前筛选器'}
   isOpen={showModal}
-  onOpen={() => {document.querySelector('.filter-name').focus()}}>
+  onOpen={() => {
+    document.querySelector('.filter-name').focus()
+  }}>
   <div class="space-y-4">
     <input
       type="text"

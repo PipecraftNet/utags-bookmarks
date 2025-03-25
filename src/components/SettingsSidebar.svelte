@@ -81,10 +81,11 @@
         </button>
       </div>
 
-      <div class="gap-y-8">
+      <div
+        class="flex max-h-[calc(100vh-8rem)] flex-col gap-y-10 overflow-y-auto pr-3">
         <div class="setting-group gap-y-6">
           <h3
-            class="mb-6 text-xl font-semibold text-gray-900 dark:text-gray-100">
+            class="mb-4 text-xl font-semibold text-gray-900 dark:text-gray-100">
             界面设置
           </h3>
           <div class="gap-y-4">
@@ -121,6 +122,115 @@
                   </span>
                 </label>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 新增数据管理分组 -->
+        <div class="setting-group gap-y-6">
+          <h3
+            class="mb-4 text-xl font-semibold text-gray-900 dark:text-gray-100">
+            数据管理
+          </h3>
+          <div class="gap-y-4">
+            <div class="flex items-center justify-between px-1 py-1.5">
+              <button
+                class="flex items-center gap-3 text-gray-700 hover:text-blue-600 dark:text-gray-300"
+                onclick={importData}>
+                <span>📥 导入数据</span>
+              </button>
+            </div>
+            <div class="flex items-center justify-between px-1 py-1.5">
+              <button
+                class="flex items-center gap-3 text-gray-700 hover:text-blue-600 dark:text-gray-300"
+                onclick={exportData}>
+                <span>📤 导出数据</span>
+              </button>
+            </div>
+            <div class="flex items-center justify-between px-1 py-1.5">
+              <button
+                class="flex items-center gap-3 text-red-600 hover:text-red-700 dark:text-red-400"
+                onclick={clearAll}>
+                <span>🗑️ 清空数据</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 新增关于分组 -->
+        <div class="setting-group gap-y-6">
+          <h3
+            class="mb-4 text-xl font-semibold text-gray-900 dark:text-gray-100">
+            关于
+          </h3>
+          <div class="gap-y-4">
+            <div class="flex items-center justify-between px-1 py-1.5">
+              <div
+                class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 16v-4" />
+                  <path d="M12 8h.01" />
+                </svg>
+                <span>版本号</span>
+              </div>
+              <span class="text-gray-500 dark:text-gray-400">v0.0.1</span>
+            </div>
+            <div class="flex items-center justify-between px-1 py-1.5">
+              <a
+                href="https://github.com/utags/utags"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex items-center gap-3 text-gray-700 hover:text-blue-600 dark:text-gray-300">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path d="M15 22v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 22v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+                <span>GitHub 仓库</span>
+              </a>
+            </div>
+            <div class="flex items-center justify-between px-1 py-1.5">
+              <a
+                href="https://github.com/utags/utags/issues"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex items-center gap-3 text-gray-700 hover:text-blue-600 dark:text-gray-300">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
+                  <path d="M12 18h0" />
+                </svg>
+                <span>报告问题</span>
+              </a>
             </div>
           </div>
         </div>

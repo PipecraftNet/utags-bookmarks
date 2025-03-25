@@ -21,20 +21,6 @@
     <span
       class="logo-text bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-xl font-bold text-transparent"
       >UTags</span>
-    <div class="flex gap-4">
-      <button
-        class="nav-btn flex items-center gap-2 rounded-md px-4 py-2 text-gray-600 transition-colors duration-200 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-        onclick={importData}>
-        <span class="text-lg">📥</span>
-        <span>导入</span>
-      </button>
-      <button
-        class="nav-btn flex items-center gap-2 rounded-md px-4 py-2 text-gray-600 transition-colors duration-200 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-        onclick={exportData}>导出</button>
-      <button
-        class="nav-btn flex items-center gap-2 rounded-md px-4 py-2 text-gray-600 transition-colors duration-200 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-        onclick={clearAll}>清空</button>
-    </div>
   </div>
 
   <!-- 移动端汉堡菜单 -->
@@ -48,16 +34,8 @@
   {#if !collapsed}
     <div
       class="absolute top-16 right-0 left-0 z-50 border-b border-(color:--seperator-line-color) bg-white/90 shadow-md md:hidden dark:bg-black/90">
-      <div class="flex flex-col gap-2 p-4">
-        <button
-          class="w-full rounded-md px-4 py-2 text-left text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-          onclick={importData}>📥 导入</button>
-        <button
-          class="w-full rounded-md px-4 py-2 text-left text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-          onclick={exportData}>📤 导出</button>
-        <button
-          class="w-full rounded-md px-4 py-2 text-left text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-          onclick={clearAll}>🗑️ 清空</button>
+      <div class="flex h-full flex-col gap-2 p-4" style="height: 100vh;">
+        手机版还没有优化，暂时无法使用
       </div>
     </div>
   {/if}
@@ -67,7 +45,7 @@
     <button
       class="rounded-md px-4 py-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
       onclick={() => (showAddModal = true)}>+ 添加</button>
-    <div class="hidden flex items-center gap-2">
+    <div class="flex hidden items-center gap-2">
       <span class="text-sm text-gray-700 dark:text-gray-200">主题: </span>
       <select
         class="rounded-md bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm transition-colors duration-200 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
@@ -98,17 +76,11 @@
       </svg>
     </button>
   </div>
+  <SettingsSidebar bind:showSettings />
+  <div class="for-init-theme-switcher hidden"><ThemeSwitcher /></div>
 </div>
 
-<SettingsSidebar bind:showSettings />
-<div class="for-init hidden"><ThemeSwitcher /></div>
-
 <style>
-  .header {
-    /* --header-height: 3.5rem; */
-    /* background-color: white; */
-  }
-
   @media (max-width: 768px) {
     .hamburger {
       font-size: 1.5rem;
